@@ -17,6 +17,7 @@ URL:		http://www.erlang.org/
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
+BuildRequires:	fastjar
 BuildRequires:	flex
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-base
