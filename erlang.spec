@@ -1,13 +1,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
-Name:		otp
+Name:		erlang
 Version:	R9C_2
 Release:	0.1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
 %define		_version	%(echo %{version} | tr _ -)
-Source0:	http://www.erlang.org/download/%{name}_src_%{_version}.tar.gz
+Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
+# Source0-md5:	3cdb1c58671995d6b334e0f8da414816
+Source1:	http://www.erlang.org/download/otp_man_R9C-0.tar.gz
+# Source1-md5:	80ab1a76fb2bf59cf83832096cf7f63b
 URL:		http://www.erlang.org/
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
@@ -26,7 +29,8 @@ Laboratory. Open-source Erlang zosta³ wydany, aby pomóc w
 rozpowszechnianiu Erlanga poza Ericssonem.
 
 %prep
-%setup -q -n %{name}_src_%{_version}
+%setup -q -n otp_src_%{_version}
+%{__tar} xf %{SOURCE1} man/ COPYRIGHT
 
 %build
 %{__autoconf}
@@ -55,55 +59,59 @@ rm -rf $RPM_BUILD_ROOT
 	TARGET="%{_build}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/erlang/erts-*/*.html
+rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
 
 sed -i -e"s#$RPM_BUILD_ROOT##" \
-	$RPM_BUILD_ROOT%{_libdir}/erlang/bin/{erl,start,start_erl}
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
 
 for l in erl erlc ; do
-	ln -sf %{_libdir}/erlang/bin/$l $RPM_BUILD_ROOT%{_bindir}
+	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
-ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/erlang/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
+ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
 for l in ear ecc elink escript ; do
 	ln -sf $ERTSDIR/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
-ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/erlang/bin
+ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/%{name}/bin
+
+cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS EPLICENCE README erts/notes.html
+%doc AUTHORS EPLICENCE README erts/notes.html COPYRIGHT
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
-%dir %{_libdir}/erlang/bin
-%attr(755,root,root) %{_libdir}/erlang/bin/epmd
-%attr(755,root,root) %{_libdir}/erlang/bin/erl
-%attr(755,root,root) %{_libdir}/erlang/bin/erlc
-%attr(755,root,root) %{_libdir}/erlang/bin/run_erl
-%attr(755,root,root) %{_libdir}/erlang/bin/start
-%attr(755,root,root) %{_libdir}/erlang/bin/start_erl
-%attr(755,root,root) %{_libdir}/erlang/bin/to_erl
-%{_libdir}/erlang/bin/start*.*
-%dir %{_libdir}/erlang/erts-*
-%{_libdir}/erlang/erts-*/doc
-%{_libdir}/erlang/erts-*/man
-%{_libdir}/erlang/erts-*/src
-%{_libdir}/erlang/erts-*/*.ear
-%dir %{_libdir}/erlang/erts-*/bin
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/beam*
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/child*
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/e*
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/heart*
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/inet_gethost
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/run_erl
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/start
-%attr(755,root,root) %{_libdir}/erlang/erts-*/bin/to_erl
-%{_libdir}/erlang/erts-*/bin/start*.*
-%{_libdir}/erlang/lib
-%dir %{_libdir}/erlang/misc
-%attr(755,root,root) %{_libdir}/erlang/misc/*
-%{_libdir}/erlang/releases
-%{_libdir}/erlang/usr
-%attr(755,root,root) %{_libdir}/erlang/Install
+%dir %{_libdir}/%{name}/bin
+%attr(755,root,root) %{_libdir}/%{name}/bin/epmd
+%attr(755,root,root) %{_libdir}/%{name}/bin/erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/erlc
+%attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/start
+%attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
+%{_libdir}/%{name}/bin/start*.*
+%dir %{_libdir}/%{name}/erts-*
+%{_libdir}/%{name}/erts-*/doc
+%{_libdir}/%{name}/erts-*/man
+%{_libdir}/%{name}/erts-*/src
+%{_libdir}/%{name}/erts-*/*.ear
+%dir %{_libdir}/%{name}/erts-*/bin
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/e*
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/heart*
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/inet_gethost
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/run_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/start
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/to_erl
+%{_libdir}/%{name}/erts-*/bin/start*.*
+%{_libdir}/%{name}/lib
+%dir %{_libdir}/%{name}/misc
+%attr(755,root,root) %{_libdir}/%{name}/misc/*
+%{_libdir}/%{name}/releases
+%{_libdir}/%{name}/usr
+%doc %{_libdir}/%{name}/man
+%attr(755,root,root) %{_libdir}/%{name}/Install
