@@ -5,16 +5,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R9C_2
-Release:	3
+Version:	R10B_2
+Release:	0.1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
 %define		_version	%(echo %{version} | tr _ -)
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	3cdb1c58671995d6b334e0f8da414816
-Source1:	http://www.erlang.org/download/otp_man_R9C-0.tar.gz
-# Source1-md5:	f94bbaba800cc73e67704b92df5aab60
+# Source0-md5:	318f5e61872035290c5939c47631cd83
+Source1:	http://www.erlang.org/download/otp_doc_man_R10B-2.tar.gz
+# Source1-md5:	c073820c7e97988aa9483618fe67aaf0
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-ssl_timeout.patch
 Patch2:		%{name}-optional_java.patch
@@ -44,8 +44,8 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %prep
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
-%patch0 -p1
-%patch1 -p1
+#%patch0 -p1
+#%patch1 -p1
 %patch2 -p1
 
 %build
@@ -103,12 +103,15 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
+rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib/internal
+rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS EPLICENCE README erts/notes.html COPYRIGHT
+%doc AUTHORS EPLICENCE README COPYRIGHT
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
@@ -124,7 +127,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/erts-*/doc
 %{_libdir}/%{name}/erts-*/man
 %{_libdir}/%{name}/erts-*/src
-%{_libdir}/%{name}/erts-*/*.ear
+%{_libdir}/%{name}/erts-*/include
+#%{_libdir}/%{name}/erts-*/*.ear
 %dir %{_libdir}/%{name}/erts-*/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
