@@ -6,7 +6,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R9C_2
-Release:	2.1
+Release:	3
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
