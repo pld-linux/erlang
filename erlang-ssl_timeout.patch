@@ -1,0 +1,14 @@
+Based on: http://article.gmane.org/gmane.comp.lang.erlang.patches/65
+
+diff -dur otp_src_R9C-2.orig/lib/ssl/src/ssl_broker.erl otp_src_R9C-2/lib/ssl/src/ssl_broker.erl
+--- otp_src_R9C-2.orig/lib/ssl/src/ssl_broker.erl	2003-07-07 14:33:00.000000000 +0200
++++ otp_src_R9C-2/lib/ssl/src/ssl_broker.erl	2004-09-01 23:24:48.706641023 +0200
+@@ -330,6 +330,8 @@
+ 	    case gen_tcp:recv(St#st.proxysock, Length, Timeout) of
+ 		{ok, Data} ->
+ 		    {reply, {ok, Data}, St};
++		{error, timeout} ->
++		    {reply, {error, timeout}, St};
+ 		{error, Reason} ->
+ 		    {reply, {error, Reason}, St#st{status = closing}}
+ 	    end
