@@ -2,7 +2,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R9C_2
-Release:	1
+Release:	2
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
@@ -12,6 +12,7 @@ Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
 Source1:	http://www.erlang.org/download/otp_man_R9C-0.tar.gz
 # Source1-md5:	f94bbaba800cc73e67704b92df5aab60
 Patch0:		%{name}-fPIC.patch
+Patch1:		%{name}-ssl_timeout.patch
 URL:		http://www.erlang.org/
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
@@ -19,6 +20,8 @@ BuildRequires:	automake
 BuildRequires:	flex
 BuildRequires:	perl-base
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+	
+%define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/powerpc/ppc/')
 
 %description
 Erlang is a programming language designed at the Ericsson Computer
@@ -34,6 +37,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 %patch0 -p1
+%patch1 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -54,13 +58,13 @@ cd ..
 %configure
 ERL_TOP=`pwd`; export ERL_TOP
 %{__make} \
-	TARGET="%(echo %{_build} | sed -e's/amd64/x86_64/')"
+	TARGET="%{_erl_target}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
-	TARGET="%(echo %{_build} | sed -e's/amd64/x86_64/')" \
+	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
 rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
@@ -80,10 +84,19 @@ ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/%{name}/bin
 cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
 
+# some files in the library need +x, so we build the list here
+echo "%%defattr(644,root,root,755)" > lib.list
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type d \
+	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%dir %%{_libdir}/%%{name}/#" >> lib.list
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
+	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%attr(755,root,root) %%{_libdir}/%%{name}/#" >> lib.list
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
+	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+%files -f lib.list
 %defattr(644,root,root,755)
 %doc AUTHORS EPLICENCE README erts/notes.html COPYRIGHT
 %attr(755,root,root) %{_bindir}/*
@@ -112,7 +125,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/to_erl
 %{_libdir}/%{name}/erts-*/bin/start*.*
-%{_libdir}/%{name}/lib
+# (file list dynamically generated) %{_libdir}/%{name}/lib
 %dir %{_libdir}/%{name}/misc
 %attr(755,root,root) %{_libdir}/%{name}/misc/*
 %{_libdir}/%{name}/releases
