@@ -10,7 +10,7 @@ Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
 # Source0-md5:	3cdb1c58671995d6b334e0f8da414816
 Source1:	http://www.erlang.org/download/otp_man_R9C-0.tar.gz
-# Source1-md5:	80ab1a76fb2bf59cf83832096cf7f63b
+# Source1-md5:	f94bbaba800cc73e67704b92df5aab60
 URL:		http://www.erlang.org/
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
@@ -30,7 +30,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 
 %prep
 %setup -q -n otp_src_%{_version}
-%{__tar} xf %{SOURCE1} man/ COPYRIGHT
+%{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 
 %build
 %{__autoconf}
