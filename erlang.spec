@@ -1,8 +1,12 @@
+#
+# Conditional build:
+%bcond_with	java		# with Java support
+# 
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R9C_2
-Release:	2
+Release:	2.1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
@@ -13,17 +17,19 @@ Source1:	http://www.erlang.org/download/otp_man_R9C-0.tar.gz
 # Source1-md5:	f94bbaba800cc73e67704b92df5aab60
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-ssl_timeout.patch
+Patch2:		%{name}-optional_java.patch
 URL:		http://www.erlang.org/
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	fastjar
+%{?with_java:BuildRequires:	jdk >= 1.2}
+%{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	flex
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-base
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 	
-%define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/powerpc/ppc/')
+%define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
 
 %description
 Erlang is a programming language designed at the Ericsson Computer
@@ -40,6 +46,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -57,7 +64,8 @@ cd ../snmp
 cd ../../erts/
 %{__autoconf}
 cd ..
-%configure
+%configure \
+	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
 %{__make} \
 	TARGET="%{_erl_target}"
