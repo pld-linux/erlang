@@ -1,0 +1,34 @@
+diff -dur otp_src_R9C-2.orig/erts/configure.in otp_src_R9C-2/erts/configure.in
+--- otp_src_R9C-2.orig/erts/configure.in	2004-05-24 08:05:38.000000000 +0200
++++ otp_src_R9C-2/erts/configure.in	2004-10-10 23:11:12.516218543 +0200
+@@ -1262,7 +1262,13 @@
+   /bin/rm -f $ERL_TOP/lib/$a/SKIP
+ done
+ 
+-AC_CHECK_PROGS(JAVAC, javac.sh javac guavac gcj jikes bock)
++JAVAC=""
++AC_ARG_WITH([java],AS_HELP_STRING([--with-java],[use Java (default is auto)]),
++  [],[with_java=auto])
++
++if test "x$with_java" != "xno" ; then
++ AC_CHECK_PROGS(JAVAC, javac.sh javac guavac gcj jikes bock)
++fi
+ if test -n "$JAVAC"; then
+   dnl Make sure it's at least JDK 1.2
+   AC_CACHE_CHECK(for JDK version 1.2, 
+@@ -1274,7 +1280,13 @@
+   fi
+ fi
+ if test -z "$JAVAC"; then
+-  AC_MSG_WARN([Could not find any usable java compiler, will skip: jinterface])
++  if test "x$with_java" = "xyes" ; then
++    AC_MSG_ERROR([could not find any usable java compiler])
++  elif test "x$with_java" != "xno" ; then
++    AC_MSG_WARN([Could not find any usable java compiler, will skip: jinterface])
++  else
++    AC_MSG_WARN([Java support disabled, will skip: jinterface])
++  fi
+ 
+   for a in $need_java ; do
+ 	echo "No Java compiler found" > $ERL_TOP/lib/$a/SKIP
+Only in otp_src_R9C-2/erts: configure.in~
