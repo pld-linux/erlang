@@ -77,6 +77,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS EPLICENCE README erts/notes.html
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
+%dir %{_libdir}/erlang/bin
 %attr(755,root,root) %{_libdir}/erlang/bin/epmd
 %attr(755,root,root) %{_libdir}/erlang/bin/erl
 %attr(755,root,root) %{_libdir}/erlang/bin/erlc
@@ -90,6 +91,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/erlang/erts-*/man
 %{_libdir}/erlang/erts-*/src
 %{_libdir}/erlang/erts-*/*.ear
+%dir %{_libdir}/erlang/erts-*/bin
 %attr(755,root,root) %{_libdir}/erlang/erts-*/bin/beam*
 %attr(755,root,root) %{_libdir}/erlang/erts-*/bin/child*
 %attr(755,root,root) %{_libdir}/erlang/erts-*/bin/e*
