@@ -5,7 +5,7 @@ Release:	0.1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
-%define		_version	%(echo %{version} | sed -e 's#_#-#g') 
+%define		_version	%(echo %{version} | tr _ -) 
 Source0:	http://www.erlang.org/download/%{name}_src_%{_version}.tar.gz
 URL:		http://www.erlang.org/
 BuildRequires:	perl-base
