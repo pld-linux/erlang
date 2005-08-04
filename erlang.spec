@@ -25,6 +25,8 @@ BuildRequires:	automake
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	flex
 BuildRequires:	ncurses-devel
+BuildRequires:	openssl-devel >= 0.9.7
+Buildrequires:	openssl-tools
 BuildRequires:	perl-base
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 	
