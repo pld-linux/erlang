@@ -71,7 +71,7 @@ cd ..
 %configure \
 	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
-%{__make} \
+LD_ASSUME_KERNEL=2.4.19 %{__make} \
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
