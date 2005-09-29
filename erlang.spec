@@ -73,7 +73,7 @@ cd ..
 ERL_TOP=`pwd`; export ERL_TOP
 %{__make} \
 	TARGET="%{_erl_target}" \
-	|| { find . -name erl_crash.dump | xargs cat ; exit 1 }
+	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
 %install
 rm -rf $RPM_BUILD_ROOT
