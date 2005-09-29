@@ -6,7 +6,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R10B_7
-Release:	1
+Release:	1.1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
@@ -72,7 +72,8 @@ cd ..
 	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
 %{__make} \
-	TARGET="%{_erl_target}"
+	TARGET="%{_erl_target}" \
+	|| { find . -name erl_crash.dump | xargs cat ; exit 1 }
 
 %install
 rm -rf $RPM_BUILD_ROOT
