@@ -1,20 +1,21 @@
 #
 # Conditional build:
 %bcond_with	java		# with Java support
+%bcond_without	odbc		# without unixODBC support
 # 
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R10B_7
-Release:	1.1
+Version:	R10B_9
+Release:	0.9
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
 %define		_version	%(echo %{version} | tr _ -)
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	fc039c62862ebae141e27370401aaab0
-Source1:	http://www.erlang.org/download/otp_doc_man_R10B-6.tar.gz
-# Source1-md5:	0243d2ff01fb2bac03115bcbe2284b20
+# Source0-md5:	05791e9097f36202eb705df2a1db6500
+Source1:	http://www.erlang.org/download/otp_doc_man_R10B-9.tar.gz
+# Source1-md5:	051cd9893b36313f20a420bc2491905c
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
@@ -29,6 +30,11 @@ BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 Buildrequires:	openssl-tools
 BuildRequires:	perl-base
+%if %{with odbc}
+BuildRequires:  unixODBC-devel
+%else
+BuildConflicts: unixODBC-devel
+%endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 	
 %define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
