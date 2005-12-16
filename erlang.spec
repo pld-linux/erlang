@@ -7,7 +7,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R10B_9
-Release:	0.9
+Release:	1
 Epoch:		1
 License:	distributable
 Group:		Development/Languages
