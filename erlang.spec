@@ -1,3 +1,6 @@
+# NOTE: Building requires working DNS setup. Build may hang
+#       even if _only_ first dns specified in resolv.conf
+#       is unreachable.
 #
 # Conditional build:
 %bcond_with	java		# with Java support
