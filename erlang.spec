@@ -17,8 +17,8 @@ License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
 # Source0-md5:	c1405c885f07d661b7362b822d571586
-Source1:	http://www.erlang.org/download/otp_doc_man_R10B-9.tar.gz
-# Source1-md5:	051cd9893b36313f20a420bc2491905c
+Source1:	http://www.erlang.org/download/otp_doc_man_R10B-10.tar.gz
+# Source1-md5:	207e00bcaf5a9428bd86e3973f9b699f
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
