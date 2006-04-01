@@ -9,14 +9,14 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R10B_9
+Version:	R10B_10
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	05791e9097f36202eb705df2a1db6500
+# Source0-md5:	c1405c885f07d661b7362b822d571586
 Source1:	http://www.erlang.org/download/otp_doc_man_R10B-9.tar.gz
 # Source1-md5:	051cd9893b36313f20a420bc2491905c
 Patch0:		%{name}-fPIC.patch
