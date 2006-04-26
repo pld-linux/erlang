@@ -1,42 +1,45 @@
+# NOTE: Building requires working DNS setup. Build may hang
+#       even if _only_ first dns specified in resolv.conf
+#       is unreachable.
 #
 # Conditional build:
 %bcond_with	java		# with Java support
 %bcond_without	odbc		# without unixODBC support
-# 
+#
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R10B_9
+Version:	R10B_10
 Release:	1
 Epoch:		1
+%define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
-%define		_version	%(echo %{version} | tr _ -)
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	05791e9097f36202eb705df2a1db6500
-Source1:	http://www.erlang.org/download/otp_doc_man_R10B-9.tar.gz
-# Source1-md5:	051cd9893b36313f20a420bc2491905c
+# Source0-md5:	c1405c885f07d661b7362b822d571586
+Source1:	http://www.erlang.org/download/otp_doc_man_R10B-10.tar.gz
+# Source1-md5:	207e00bcaf5a9428bd86e3973f9b699f
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
 URL:		http://www.erlang.org/
+%{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
-%{?with_java:BuildRequires:	jdk >= 1.2}
-%{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	flex
+%{?with_java:BuildRequires:	jdk >= 1.2}
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 Buildrequires:	openssl-tools
 BuildRequires:	perl-base
 %if %{with odbc}
-BuildRequires:  unixODBC-devel
+BuildRequires:	unixODBC-devel
 %else
-BuildConflicts: unixODBC-devel
+BuildConflicts:	unixODBC-devel
 %endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-	
+
 %define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
 
 %description
