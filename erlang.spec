@@ -4,6 +4,7 @@
 # TODO
 # - separate -devel (at least header files!)
 # - modularize (odbc, etc)
+# - manuals to %{_mandir}
 #
 # Conditional build:
 %bcond_with	java		# with Java support
