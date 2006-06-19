@@ -1,6 +1,9 @@
 # NOTE: Building requires working DNS setup. Build may hang
 #       even if _only_ first dns specified in resolv.conf
 #       is unreachable.
+# TODO
+# - separate -devel (at least header files!)
+# - modularize (odbc, etc)
 #
 # Conditional build:
 %bcond_with	java		# with Java support
