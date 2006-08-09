@@ -14,7 +14,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
 Version:	R11B_0
-Release:	1
+Release:	2
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
