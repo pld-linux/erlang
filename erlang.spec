@@ -1,10 +1,6 @@
 # NOTE: Building requires working DNS setup. Build may hang
 #       even if _only_ first dns specified in resolv.conf
 #       is unreachable.
-# TODO
-# - separate -devel (at least header files!)
-# - modularize (odbc, etc)
-# - manuals to %{_mandir}
 #
 # Conditional build:
 %bcond_with	java		# with Java support
@@ -13,22 +9,22 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R11B_0
-Release:	2
+Version:	R10B_10
+Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	367d9d3ba979cd278b78d6d0393982ba
-Source1:	http://www.erlang.org/download/otp_doc_man_R11B-0.tar.gz
-# Source1-md5:	172591538db42e81b814a77f30da4fa4
+# Source0-md5:	c1405c885f07d661b7362b822d571586
+Source1:	http://www.erlang.org/download/otp_doc_man_R10B-10.tar.gz
+# Source1-md5:	207e00bcaf5a9428bd86e3973f9b699f
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
-BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	flex
@@ -84,7 +80,7 @@ cd ..
 %configure \
 	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
- %{__make} \
+LD_ASSUME_KERNEL=2.4.19 %{__make} \
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
@@ -100,7 +96,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
 sed -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
 
-for l in erl erlc dialyzer epmd run_erl to_erl ; do
+for l in erl erlc ; do
 	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
@@ -121,7 +117,7 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
-rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib
+rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib/internal
 rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
 
 %clean
@@ -133,7 +129,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
-%attr(755,root,root) %{_libdir}/%{name}/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/bin/epmd
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
@@ -151,7 +146,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/%{name}/erts-*/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/e*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/heart*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/inet_gethost
