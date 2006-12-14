@@ -5,6 +5,7 @@
 # - separate -devel (at least header files!)
 # - modularize (odbc, etc)
 # - manuals to %{_mandir}
+# - investigate fPIC.patch
 #
 # Conditional build:
 %bcond_with	java		# with Java support
@@ -13,16 +14,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R11B_1
+Version:	R11B_2
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	1fe3707d9bed898bc51444cb529fdd79
-Source1:	http://www.erlang.org/download/otp_doc_man_R11B-1.tar.gz
-# Source1-md5:	dbd2d3da878fed7474b7a9aa03e13c7d
+# Source0-md5:	7d7cca1d2f392a8a317cb4c0bd904726
+Source1:	http://www.erlang.org/download/otp_doc_man_R11B-2.tar.gz
+# Source1-md5:	c81023f591c1bace836de3aa874f3c2a
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
