@@ -14,16 +14,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
 Name:		erlang
-Version:	R11B_2
+Version:	R11B_3
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	7d7cca1d2f392a8a317cb4c0bd904726
-Source1:	http://www.erlang.org/download/otp_doc_man_R11B-2.tar.gz
-# Source1-md5:	c81023f591c1bace836de3aa874f3c2a
+# Source0-md5:	2806e5a2f26cb1b20f3ea1a6f3ec0276
+Source1:	http://www.erlang.org/download/otp_doc_man_R11B-3.tar.gz
+# Source1-md5:	645ef1ded84b470e9c05a4757dce88cf
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
@@ -107,7 +107,7 @@ for l in erl erlc dialyzer epmd run_erl to_erl ; do
 	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
-for l in ear ecc elink escript ; do
+for l in epmd ; do
 	ln -sf $ERTSDIR/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/%{name}/bin
@@ -161,6 +161,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/run_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/to_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/typer
 %{_libdir}/%{name}/erts-*/bin/start*.*
 # (file list dynamically generated) %{_libdir}/%{name}/lib
 %dir %{_libdir}/%{name}/misc
