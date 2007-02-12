@@ -12,7 +12,7 @@
 %bcond_without	odbc		# without unixODBC support
 #
 Summary:	OpenSource Erlang/OTP
-Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
+Summary(pl.UTF-8):   Erlang/OTP z otwartymi ÅºrÃ³dÅ‚ami
 Name:		erlang
 Version:	R11B_3
 Release:	1
@@ -53,9 +53,9 @@ Erlang is a programming language designed at the Ericsson Computer
 Science Laboratory. Open-source Erlang is being released to help
 encourage the spread of Erlang outside Ericsson.
 
-%description -l pl
-Erlang to jêzyk programowania opracowany w Ericsson Computer Science
-Laboratory. Open-source Erlang zosta³ wydany, aby pomóc w
+%description -l pl.UTF-8
+Erlang to jÄ™zyk programowania opracowany w Ericsson Computer Science
+Laboratory. Open-source Erlang zostaÅ‚ wydany, aby pomÃ³c w
 rozpowszechnianiu Erlanga poza Ericssonem.
 
 %prep
