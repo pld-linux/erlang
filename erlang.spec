@@ -12,7 +12,7 @@
 %bcond_without	odbc		# without unixODBC support
 #
 Summary:	OpenSource Erlang/OTP
-Summary(pl.UTF-8):   Erlang/OTP z otwartymi źródłami
+Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	R11B_3
 Release:	1
