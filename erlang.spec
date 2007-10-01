@@ -14,14 +14,14 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	R11B_3
+Version:	R11B_5
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	2806e5a2f26cb1b20f3ea1a6f3ec0276
+# Source0-md5:	96acec41da87d6ee0ef18e1aab36ffdd
 Source1:	http://www.erlang.org/download/otp_doc_man_R11B-3.tar.gz
 # Source1-md5:	645ef1ded84b470e9c05a4757dce88cf
 Patch0:		%{name}-fPIC.patch
@@ -87,7 +87,7 @@ cd ..
 %configure \
 	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
- %{__make} \
+ %{__make} -j1 \
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
@@ -103,7 +103,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
 sed -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
 
-for l in erl erlc dialyzer epmd run_erl to_erl ; do
+for l in erl erlc escript dialyzer epmd run_erl to_erl typer; do
 	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
@@ -140,10 +140,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/epmd
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
+%attr(755,root,root) %{_libdir}/%{name}/bin/escript
 %attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-*
 %{_libdir}/%{name}/erts-*/doc
