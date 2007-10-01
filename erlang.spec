@@ -22,6 +22,7 @@ Source1:	http://www.erlang.org/download/otp_doc_man_R10B-10.tar.gz
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
+Patch3:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -58,6 +59,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -80,7 +82,7 @@ cd ..
 %configure \
 	--with%{!?with_java:out}-java
 ERL_TOP=`pwd`; export ERL_TOP
-LD_ASSUME_KERNEL=2.4.19 %{__make} \
+%{__make} -j1 \
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
