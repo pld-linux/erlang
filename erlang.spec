@@ -84,6 +84,7 @@ cd ../../erts/
 cd ..
 %configure \
 	--with%{!?with_java:out}-java
+rm -rf lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
  %{__make} -j1 \
 	TARGET="%{_erl_target}" \
