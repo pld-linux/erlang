@@ -22,8 +22,8 @@ License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
 # Source0-md5:	05861c7f75d7b2ed5af42c93cebe5801
-Source1:	http://www.erlang.org/download/otp_doc_man_R12B-1.tar.gz
-# Source1-md5:	96da62bcfb40e5d3ec2945bb2b050024
+Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
+# Source1-md5:	645a4486f02338a5cf22be7563b862f9
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-tinfo.patch
