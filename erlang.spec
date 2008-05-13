@@ -83,6 +83,9 @@ cd ../../erts/
 %{__autoconf}
 cd ..
 %configure \
+%ifarch sparc
+	CFLAGS="%{rpmcflags} -mv8plus" \
+%endif
 	--with%{!?with_java:out}-java
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
