@@ -14,19 +14,20 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	R12B_1
-Release:	2
+Version:	R12B_2
+Release:	0.1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	6de3630b446e9c2150edfe01e383c917
+# Source0-md5:	05861c7f75d7b2ed5af42c93cebe5801
 Source1:	http://www.erlang.org/download/otp_doc_man_R12B-1.tar.gz
 # Source1-md5:	96da62bcfb40e5d3ec2945bb2b050024
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-tinfo.patch
+Patch3:		%{name}-new_glibc.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -63,6 +64,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -96,7 +98,7 @@ ERL_TOP=`pwd`; export ERL_TOP
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%{__make} -j1 install \
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
