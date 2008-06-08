@@ -15,7 +15,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	R12B_2
-Release:	1
+Release:	2
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
@@ -28,6 +28,7 @@ Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-tinfo.patch
 Patch3:		%{name}-new_glibc.patch
+Patch4:		%{name}-as_needed.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -65,6 +66,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p0
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
