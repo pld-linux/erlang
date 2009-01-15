@@ -5,27 +5,28 @@
 # - separate -devel (at least header files!)
 # - modularize (odbc, etc)
 # - manuals to %{_mandir}
+# - investigate fPIC.patch
 #
 # Conditional build:
 %bcond_with	java		# with Java support
 %bcond_without	odbc		# without unixODBC support
 #
 Summary:	OpenSource Erlang/OTP
-Summary(pl):	Erlang/OTP z otwartymi ¼ród³ami
+Summary(pl.UTF-8):	Erlang/OTP z otwartymi ÅºrÃ³dÅ‚ami
 Name:		erlang
-Version:	R11B_0
-Release:	2
+Version:	R12B_5
+Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	367d9d3ba979cd278b78d6d0393982ba
-Source1:	http://www.erlang.org/download/otp_doc_man_R11B-0.tar.gz
-# Source1-md5:	172591538db42e81b814a77f30da4fa4
+# Source0-md5:	3751ea3fea669d2b25c67eeb883734bb
+Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
+# Source1-md5:	6231cb172847040395cc34b20781aa3b
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-optional_java.patch
-Patch2:		%{name}-hipe_optimistic_regalloc_once_only.patch
+Patch2:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -51,9 +52,9 @@ Erlang is a programming language designed at the Ericsson Computer
 Science Laboratory. Open-source Erlang is being released to help
 encourage the spread of Erlang outside Ericsson.
 
-%description -l pl
-Erlang to jêzyk programowania opracowany w Ericsson Computer Science
-Laboratory. Open-source Erlang zosta³ wydany, aby pomóc w
+%description -l pl.UTF-8
+Erlang to jÄ™zyk programowania opracowany w Ericsson Computer Science
+Laboratory. Open-source Erlang zostaÅ‚ wydany, aby pomÃ³c w
 rozpowszechnianiu Erlanga poza Ericssonem.
 
 %prep
@@ -82,16 +83,20 @@ cd ../../erts/
 %{__autoconf}
 cd ..
 %configure \
+%ifarch sparc
+	CFLAGS="%{rpmcflags} -mv8plus" \
+%endif
 	--with%{!?with_java:out}-java
+rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
- %{__make} \
+ %{__make} -j1 \
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%{__make} -j1 install \
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
@@ -100,11 +105,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
 sed -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
 
-for l in erl erlc dialyzer epmd run_erl to_erl ; do
+for l in erl erlc escript dialyzer epmd run_erl to_erl typer; do
 	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
-for l in ear ecc elink escript ; do
+for l in epmd ; do
 	ln -sf $ERTSDIR/bin/$l $RPM_BUILD_ROOT%{_bindir}
 done
 ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/%{name}/bin
@@ -137,10 +142,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/epmd
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
+%attr(755,root,root) %{_libdir}/%{name}/bin/escript
 %attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-*
 %{_libdir}/%{name}/erts-*/doc
@@ -158,6 +165,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/run_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/to_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/typer
 %{_libdir}/%{name}/erts-*/bin/start*.*
 # (file list dynamically generated) %{_libdir}/%{name}/lib
 %dir %{_libdir}/%{name}/misc
