@@ -29,7 +29,7 @@ Patch1:		%{name}-optional_java.patch
 Patch2:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
-BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	XFree86-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	flex
