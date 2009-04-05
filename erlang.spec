@@ -14,6 +14,7 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
+# keep stable line, currently R12
 Version:	R12B_5
 Release:	1
 Epoch:		1
