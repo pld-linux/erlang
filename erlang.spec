@@ -37,7 +37,7 @@ BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
-Buildrequires:	openssl-tools
+BuildRequires:	openssl-tools
 BuildRequires:	perl-base
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
