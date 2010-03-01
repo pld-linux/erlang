@@ -14,20 +14,19 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-# keep stable line, currently R12
-Version:	R12B_5
+# keep stable line, currently R13
+Version:	R13B04
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	3751ea3fea669d2b25c67eeb883734bb
+# Source0-md5:	ca6da4921e438891967900aa6a084341
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	6231cb172847040395cc34b20781aa3b
+# Source1-md5:	681aaef70affc64743f4e8c0675034af
 Patch0:		%{name}-fPIC.patch
-Patch1:		%{name}-optional_java.patch
-Patch2:		%{name}-tinfo.patch
+Patch1:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -46,7 +45,7 @@ BuildConflicts:	unixODBC-devel
 %endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define _erl_target %(echo %{_build} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
+%define _erl_target %(echo %{_build}-gnu | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
 
 %description
 Erlang is a programming language designed at the Ericsson Computer
@@ -63,7 +62,6 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -87,7 +85,7 @@ cd ..
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
 %endif
-	--with%{!?with_java:out}-java
+	--with%{!?with_java:out}-javac
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
  %{__make} -j1 \
@@ -135,7 +133,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS EPLICENCE README COPYRIGHT
+%doc AUTHORS EPLICENCE COPYRIGHT
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
@@ -160,6 +158,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dialyzer
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dyn_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/e*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/heart*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/inet_gethost
