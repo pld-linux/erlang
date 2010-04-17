@@ -1,0 +1,148 @@
+From 0c963550412174a4c4fe64aa7f70189998abef41 Mon Sep 17 00:00:00 2001
+From: Peter Lemenkov <lemenkov@gmail.com>
+Date: Thu, 15 Apr 2010 13:31:36 +0400
+Subject: [PATCH 6/9] Fix shared libraries installation
+
+Several shared libraries (asn1_erl_drv.so, megaco_flex_scanner_drv_mt.so,
+megaco_flex_scanner_drv.so, wxe_driver.so) were installed as data files
+previously.
+
+Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>
+---
+ lib/asn1/c_src/Makefile         |    2 +-
+ lib/megaco/src/flex/Makefile.in |    2 +-
+ lib/wx/c_src/Makefile.in        |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/lib/asn1/c_src/Makefile b/lib/asn1/c_src/Makefile
+index 906c513..9e9cb18 100644
+--- a/lib/asn1/c_src/Makefile
++++ b/lib/asn1/c_src/Makefile
+@@ -124,7 +124,7 @@ include $(ERL_TOP)/make/otp_release_targets.mk
+ 
+ release_spec: opt
+ 	$(INSTALL_DIR) $(RELSYSDIR)/priv/lib
+-	$(INSTALL_DATA) $(SHARED_OBJ_FILES) $(RELSYSDIR)/priv/lib
++	$(INSTALL_PROGRAM) $(SHARED_OBJ_FILES) $(RELSYSDIR)/priv/lib
+ 	$(INSTALL_DIR) $(RELSYSDIR)/c_src
+ 	$(INSTALL_DATA) $(C_FILES) $(RELSYSDIR)/c_src
+ 
+diff --git a/lib/megaco/src/flex/Makefile.in b/lib/megaco/src/flex/Makefile.in
+index 6ce9b34..5af651d 100644
+--- a/lib/megaco/src/flex/Makefile.in
++++ b/lib/megaco/src/flex/Makefile.in
+@@ -280,7 +280,7 @@ release_spec: opt
+ 	$(INSTALL_DATA) $(TARGET_FILES) $(RELSYSDIR)/ebin
+ ifeq ($(ENABLE_MEGACO_FLEX_SCANNER),true)
+ 	$(INSTALL_DATA) $(FLEX_FILES) $(C_TARGETS) $(RELSYSDIR)/src/flex
+-	$(INSTALL_DATA) $(SOLIBS) $(RELSYSDIR)/priv/lib
++	$(INSTALL_PROGRAM) $(SOLIBS) $(RELSYSDIR)/priv/lib
+ endif
+ 
+ 
+diff --git a/lib/wx/c_src/Makefile.in b/lib/wx/c_src/Makefile.in
+index 5a0b4ce..8710641 100644
+--- a/lib/wx/c_src/Makefile.in
++++ b/lib/wx/c_src/Makefile.in
+@@ -167,7 +167,7 @@ release_spec: opt
+ 	$(INSTALL_DIR) $(RELSYSDIR)/priv/$(SYS_TYPE)
+ 	$(INSTALL_DATA) ../priv/erlang-logo32.png $(RELSYSDIR)/priv/
+ 	$(INSTALL_DATA) ../priv/erlang-logo64.png $(RELSYSDIR)/priv/
+-	$(INSTALL_DATA) $(TARGET_DIR)/$(TARGET_API)$(SO_EXT) $(RELSYSDIR)/priv/$(SYS_TYPE)
++	$(INSTALL_PROGRAM) $(TARGET_DIR)/$(TARGET_API)$(SO_EXT) $(RELSYSDIR)/priv/$(SYS_TYPE)
+ 
+ release_docs_spec:
+ 
+-- 
+1.6.6.1
+
+From 6ffccff36e0d94cba0412cf3a29769b4a19d3be3 Mon Sep 17 00:00:00 2001
+From: Peter Lemenkov <lemenkov@gmail.com>
+Date: Fri, 16 Apr 2010 21:13:47 +0400
+Subject: [PATCH 7/9] Fix for dlopening libGL and libGLU
+
+Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>
+---
+ lib/wx/c_src/wxe_gl.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/wx/c_src/wxe_gl.cpp b/lib/wx/c_src/wxe_gl.cpp
+index 63dd68f..36bf15f 100644
+--- a/lib/wx/c_src/wxe_gl.cpp
++++ b/lib/wx/c_src/wxe_gl.cpp
+@@ -81,7 +81,7 @@ int initOpenGL()
+   WCHAR * DLName = wxT("opengl32.dll");
+   HMODULE LIBhandle = LoadLibrary(DLName);
+ #else 
+-  char * DLName = (char *) "libGL.so";
++  char * DLName = (char *) "libGL.so.1";
+   void * LIBhandle = dlopen(DLName, RTLD_LAZY);
+ #endif
+   // fprintf(stderr, "Loading GL: %s\r\n", (const char*)DLName);
+@@ -132,7 +132,7 @@ int initOpenGL()
+   DLName = wxT("glu32.dll");
+   LIBhandle = LoadLibrary(DLName);
+ #else 
+-  DLName = (char *) "libGLU.so";
++  DLName = (char *) "libGLU.so.1";
+   LIBhandle = dlopen(DLName, RTLD_LAZY);
+ #endif
+   // fprintf(stderr, "Loading GL: %s\r\n", (const char*)DLName);
+-- 
+1.6.6.1
+
+From d496ce48940411976617b66a5c941c78313cb78c Mon Sep 17 00:00:00 2001
+From: Michael Santos <michael.santos@gmail.com>
+Date: Thu, 18 Mar 2010 20:08:10 -0400
+Subject: [PATCH 8/9] Fix check for compile workspace overflow
+
+Patch from:
+http://vcs.pcre.org/viewvc/code/trunk/pcre_compile.c?r1=504&r2=505&view=patch
+
+Test case:
+N = 819, re:compile([lists:duplicate(N, $(), lists:duplicate(N, $))]).
+
+Compiling large regular expressions could overflow the workspace
+buffer. Modify the test to check for a value smaller than the buffer
+size.
+---
+ erts/emulator/pcre/pcre_compile.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/erts/emulator/pcre/pcre_compile.c b/erts/emulator/pcre/pcre_compile.c
+index 2974336..9508c5a 100644
+--- a/erts/emulator/pcre/pcre_compile.c
++++ b/erts/emulator/pcre/pcre_compile.c
+@@ -92,6 +92,11 @@ is 4 there is plenty of room. */
+ 
+ #define COMPILE_WORK_SIZE (4096)
+ 
++/* The overrun tests check for a slightly smaller size so that they detect the
++overrun before it actually does run off the end of the data block. */
++
++#define WORK_SIZE_CHECK (COMPILE_WORK_SIZE - 100)
++
+ 
+ /* Table for handling escaped characters in the range '0'-'z'. Positive returns
+ are simple data values; negative values are for special things like \d and so
+@@ -2445,7 +2450,7 @@ for (;; ptr++)
+ #ifdef DEBUG
+     if (code > cd->hwm) cd->hwm = code;                 /* High water info */
+ #endif
+-    if (code > cd->start_workspace + COMPILE_WORK_SIZE) /* Check for overrun */
++    if (code > cd->start_workspace + WORK_SIZE_CHECK)   /* Check for overrun */
+       {
+       *errorcodeptr = ERR52;
+       goto FAILED;
+@@ -2494,7 +2499,7 @@ for (;; ptr++)
+   /* In the real compile phase, just check the workspace used by the forward
+   reference list. */
+ 
+-  else if (cd->hwm > cd->start_workspace + COMPILE_WORK_SIZE)
++  else if (cd->hwm > cd->start_workspace + WORK_SIZE_CHECK)
+     {
+     *errorcodeptr = ERR52;
+     goto FAILED;
+-- 
+1.6.6.1
+
