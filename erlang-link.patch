@@ -1,0 +1,11 @@
+--- otp_src_R14A/erts/etc/common/Makefile.in~	2010-06-11 17:29:33.000000000 +0200
++++ otp_src_R14A/erts/etc/common/Makefile.in	2010-09-02 10:08:53.575893774 +0200
+@@ -296,7 +296,7 @@
+ 	$(CC) $(CFLAGS) -o $@ -c inet_gethost.c
+ 
+ $(BINDIR)/inet_gethost@EXEEXT@: $(OBJDIR)/inet_gethost.o $(ENTRY_OBJ)
+-	$(PURIFY) $(LD) $(LDFLAGS) $(ENTRY_LDFLAGS) -o $@ $(OBJDIR)/inet_gethost.o $(ENTRY_OBJ) $(LIBS) $(ERTS_INTERNAL_LIBS)
++	$(PURIFY) $(LD) $(LDFLAGS) $(ENTRY_LDFLAGS) -o $@ $(OBJDIR)/inet_gethost.o $(ENTRY_OBJ) $(ERTS_INTERNAL_LIBS) $(LIBS)
+ 
+ $(BINDIR)/run_erl: $(OBJDIR)/safe_string.o $(OBJDIR)/run_erl.o
+ 	$(LD) $(LDFLAGS) -o $@ $(OBJDIR)/safe_string.o $(OBJDIR)/run_erl.o $(LIBS)
