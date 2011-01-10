@@ -15,19 +15,20 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
-Version:	R14A
-Release:	1.1
+Version:	R14B01
+Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	a24873bbace9ab3c307f3d2492d9e134
+# Source0-md5:	ce595447571128bc66f630a8fa13339a
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	b57a7846818ad144b1b6ecc0a54de2ae
+# Source1-md5:	55376d3b1994d083cd21c9d849517c6c
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-tinfo.patch
 Patch2:		%{name}-link.patch
+Patch3:		%{name}-fortify.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -64,25 +65,16 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
-%{__autoconf}
-cd lib
-%{__autoconf}
-cd erl_interface
-%{__autoconf}
-cd ../gs
-%{__autoconf}
-cd ../megaco
-%{__autoconf}
-cd ../odbc
-%{__autoconf}
-cd ../snmp
-%{__autoconf}
-cd ../../erts/
-%{__autoconf}
-cd ..
+curd=$(pwd)
+for i in $(find . -type f -name configure.in); do
+	cd $(dirname $i)
+	%{__autoconf}
+	cd $curd
+done
 %configure \
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
