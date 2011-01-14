@@ -1,11 +1,36 @@
---- otp_src_R14B01/erts/emulator/drivers/common/efile_drv.c~	2010-12-07 16:07:22.000000000 +0100
-+++ otp_src_R14B01/erts/emulator/drivers/common/efile_drv.c	2011-01-10 12:05:42.950806366 +0100
-@@ -174,7 +174,7 @@
- 
- #else
- #  define FILENAME_BYTELEN(Str) strlen(Str)
--#  define FILENAME_COPY(To,From) strcpy(To,From) 
-+#  define FILENAME_COPY(To,From) memcpy(To,From,strlen(From)+1)
- #  define FILENAME_CHARSIZE 1
- #endif
- 
+commit a1a83039a77d39f7691969503d190cb6dfcd49c9
+Author: Patrik Nyblom <pan@erlang.org>
+Date:   Wed Jan 12 15:41:46 2011 +0100
+
+    Remove strange name field in efile_drv.c as it upsets -D_FORTIFY_SOURCE
+
+diff --git a/erts/emulator/drivers/common/efile_drv.c b/erts/emulator/drivers/common/efile_drv.c
+index 786fa7d..6449c6f 100644
+--- a/erts/emulator/drivers/common/efile_drv.c
++++ b/erts/emulator/drivers/common/efile_drv.c
+@@ -385,7 +385,6 @@ struct t_data
+ 	    ErlDrvBinary *binp;
+ 	    int           size;
+ 	    int           offset;
+-	    char          name[1];
+ 	} read_file;
+ 	struct {
+ 	    struct t_readdir_buf *first_buf;
+@@ -1117,7 +1116,7 @@ static void invoke_read_file(void *data)
+ 	Sint64 size;
+ 	
+ 	if (! (d->result_ok = 
+-	       efile_openfile(&d->errInfo, d->c.read_file.name, 
++	       efile_openfile(&d->errInfo, d->b, 
+ 			      EFILE_MODE_READ, &fd, &size))) {
+ 	    goto done;
+ 	}
+@@ -3071,7 +3070,7 @@ file_outputv(ErlDrvData e, ErlIOVec *ev) {
+ 	d->command = command;
+ 	d->reply = !0;
+ 	/* Copy name */
+-	FILENAME_COPY(d->c.read_file.name, filename);
++	FILENAME_COPY(d->b, filename);
+ 	d->c.read_file.binp = NULL;
+ 	d->invoke = invoke_read_file;
+ 	d->free = free_read_file;
