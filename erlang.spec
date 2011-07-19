@@ -15,20 +15,19 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
-Version:	R14B01
+Version:	R14B03
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	ce595447571128bc66f630a8fa13339a
+# Source0-md5:	7979e662d11476b97c462feb7c132fb7
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	55376d3b1994d083cd21c9d849517c6c
+# Source1-md5:	357f54b174bb29d41fee97c063a47e8f
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-tinfo.patch
 Patch2:		%{name}-link.patch
-Patch3:		%{name}-fortify.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -65,7 +64,6 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -131,12 +129,14 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/*
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
+%attr(755,root,root) %{_libdir}/%{name}/bin/ct_run
 %attr(755,root,root) %{_libdir}/%{name}/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/bin/epmd
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
 %attr(755,root,root) %{_libdir}/%{name}/bin/escript
 %attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/run_test
 %attr(755,root,root) %{_libdir}/%{name}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
@@ -151,6 +151,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/%{name}/erts-*/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
+%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/ct_run
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dyn_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/e*
