@@ -16,7 +16,7 @@ Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
 Version:	R14B03
-Release:	2
+Release:	3
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
