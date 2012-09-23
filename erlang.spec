@@ -15,19 +15,18 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
-Version:	R15B
+Version:	R15B02
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	dd6c2a4807551b4a8a536067bde31d73
+# Source0-md5:	ccbe5e032a2afe2390de8913bfe737a1
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	9738da523737712a9db87db0dee05338
+# Source1-md5:	974020ba533242fca759a7f5eaf628e5
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-tinfo.patch
-Patch2:		%{name}-link.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -63,7 +62,6 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -77,7 +75,7 @@ done
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
 %endif
-	--with%{!?with_java:out}-javac
+	--with-javac%{!?with_java:=no}
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
  %{__make} -j1 \
@@ -91,19 +89,8 @@ rm -rf $RPM_BUILD_ROOT
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/*.html
-
 sed -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
-
-for l in erl erlc escript dialyzer epmd run_erl to_erl typer; do
-	ln -sf %{_libdir}/%{name}/bin/$l $RPM_BUILD_ROOT%{_bindir}
-done
-ERTSDIR=`echo $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-* | sed -e"s#^$RPM_BUILD_ROOT##"`
-for l in epmd ; do
-	ln -sf $ERTSDIR/bin/$l $RPM_BUILD_ROOT%{_bindir}
-done
-ln -sf $ERTSDIR/bin/epmd $RPM_BUILD_ROOT%{_libdir}/%{name}/bin
 
 cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
@@ -117,8 +104,8 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
-rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib
-rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
+%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib
+%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -126,7 +113,16 @@ rm -rf $RPM_BUILD_ROOT
 %files -f lib.list
 %defattr(644,root,root,755)
 %doc AUTHORS EPLICENCE COPYRIGHT
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_bindir}/ct_run
+%attr(755,root,root) %{_bindir}/dialyzer
+%attr(755,root,root) %{_bindir}/epmd
+%attr(755,root,root) %{_bindir}/erl
+%attr(755,root,root) %{_bindir}/erlc
+%attr(755,root,root) %{_bindir}/escript
+%attr(755,root,root) %{_bindir}/run_erl
+%attr(755,root,root) %{_bindir}/run_test
+%attr(755,root,root) %{_bindir}/to_erl
+%attr(755,root,root) %{_bindir}/typer
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
 %attr(755,root,root) %{_libdir}/%{name}/bin/ct_run
