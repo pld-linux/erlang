@@ -15,16 +15,16 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
-Version:	R15B02
+Version:	R16B
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	ccbe5e032a2afe2390de8913bfe737a1
+# Source0-md5:	7ee131515bc496e7522e0dec2a4c26e3
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	974020ba533242fca759a7f5eaf628e5
+# Source1-md5:	f3a34cc45c8d0b44bec839824d5fca09
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
@@ -120,7 +120,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/erlc
 %attr(755,root,root) %{_bindir}/escript
 %attr(755,root,root) %{_bindir}/run_erl
-%attr(755,root,root) %{_bindir}/run_test
 %attr(755,root,root) %{_bindir}/to_erl
 %attr(755,root,root) %{_bindir}/typer
 %dir %{_libdir}/erlang
@@ -132,7 +131,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
 %attr(755,root,root) %{_libdir}/%{name}/bin/escript
 %attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
-%attr(755,root,root) %{_libdir}/%{name}/bin/run_test
 %attr(755,root,root) %{_libdir}/%{name}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
