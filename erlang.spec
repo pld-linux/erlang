@@ -15,16 +15,16 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 # A - unstable, B - stable line, keep stable
-Version:	R16B02
+Version:	R16B03
 Release:	1
 Epoch:		1
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	ca63bcde0e5ae0f2df9457f97b3115a4
+# Source0-md5:	c330150913556a0fe73e57a441cb6375
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	fe3ff42375090d33ce1ba98c28218cf3
+# Source1-md5:	099ed598feadc54e7efea908cc598f08
 Patch0:		%{name}-fPIC.patch
 Patch1:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
