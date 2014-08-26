@@ -14,19 +14,17 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-# A - unstable, B - stable line, keep stable
-Version:	R16B03
+Version:	17.1
 Release:	1
-Epoch:		1
+Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	c330150913556a0fe73e57a441cb6375
+# Source0-md5:	9c90706ce70e01651adde34a2b79bf4c
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	099ed598feadc54e7efea908cc598f08
+# Source1-md5:	a64a5d0214936211bfb3bac4b824ad49
 Patch0:		%{name}-fPIC.patch
-Patch1:		%{name}-tinfo.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	xorg-lib-libX11-devel
@@ -61,7 +59,6 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
-%patch1 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
