@@ -1,0 +1,45 @@
+From: Peter Lemenkov <lemenkov@gmail.com>
+Date: Fri, 6 Jun 2014 15:29:49 +0400
+Subject: [PATCH] Added systemd notify support to EPMD
+
+Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>
+
+Conflicts:
+	erts/configure.in
+
+diff --git a/erts/epmd/src/epmd.c b/erts/epmd/src/epmd.c
+index 3cfa7a7..67e8b49 100644
+--- a/erts/epmd/src/epmd.c
++++ b/erts/epmd/src/epmd.c
+@@ -589,9 +589,11 @@ void epmd_cleanup_exit(EpmdVars *g, int exitval)
+       for(i=0; g->argv[i] != NULL; ++i)
+ 	  free(g->argv[i]);
+       free(g->argv);
+-  }      
+-      
+-
++  }
++#ifdef HAVE_SYSTEMD_SD_DAEMON_H
++  sd_notifyf(0, "STATUS=Exited.\n"
++                "ERRNO=%i", exitval);
++#endif // HAVE_SYSTEMD_SD_DAEMON_H
+   exit(exitval);
+ }
+ 
+diff --git a/erts/epmd/src/epmd_srv.c b/erts/epmd/src/epmd_srv.c
+index 48fd7a5..18d898a 100644
+--- a/erts/epmd/src/epmd_srv.c
++++ b/erts/epmd/src/epmd_srv.c
+@@ -399,8 +399,11 @@ void run(EpmdVars *g)
+       }
+       select_fd_set(g, listensock[i]);
+     }
+-#ifdef HAVE_SYSTEMD_SD_DAEMON_H 
++#ifdef HAVE_SYSTEMD_SD_DAEMON_H
+     }
++    sd_notifyf(0, "READY=1\n"
++                  "STATUS=Processing port mapping requests...\n"
++                  "MAINPID=%lu", (unsigned long) getpid());
+ #endif
+ 
+   dbg_tty_printf(g,2,"entering the main select() loop");

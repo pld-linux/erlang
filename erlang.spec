@@ -14,20 +14,24 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	17.1
+Version:	17.3
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	9c90706ce70e01651adde34a2b79bf4c
+# Source0-md5:	1d0bb2d54dfe1bb6844756b99902ba20
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	a64a5d0214936211bfb3bac4b824ad49
+# Source1-md5:	6aa12c96d8d58ecc7be855c99286fc61
+Source2:	epmd.service
+Source3:	epmd.socket
+Source4:	epmd@.service
+Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
+Patch1:		otp-0007-Added-systemd-notify-support-to-EPMD.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
-BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	flex
@@ -36,11 +40,14 @@ BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 BuildRequires:	openssl-tools
 BuildRequires:	perl-base
+BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
 %else
 BuildConflicts:	unixODBC-devel
 %endif
+Requires:	systemd-units >= 38
+Requires(post,preun,postun):	systemd-units >= 38
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define _erl_target %(echo %{_build}-gnu | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
@@ -59,6 +66,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
+%patch1 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -72,6 +80,8 @@ done
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
 %endif
+	--disable-silent-rules \
+	--enable-smp-support \
 	--with-javac%{!?with_java:=no}
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
@@ -85,6 +95,11 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -j1 install \
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
+
+install -D -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.service
+install -D -p %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.socket
+install -D -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.service
+install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 
 sed -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
@@ -106,6 +121,17 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+%systemd_post epmd.service
+%systemd_post epmd@.service
+
+%preun
+%systemd_preun epmd.service
+%systemd_preun epmd@.service
+
+%postun
+%systemd_reload
 
 %files -f lib.list
 %defattr(644,root,root,755)
@@ -160,3 +186,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/usr
 %doc %{_libdir}/%{name}/man
 %attr(755,root,root) %{_libdir}/%{name}/Install
+
+%{systemdunitdir}/epmd.service
+%{systemdunitdir}/epmd.socket
+%{systemdunitdir}/epmd@.service
+%{systemdunitdir}/epmd@.socket
