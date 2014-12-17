@@ -14,22 +14,21 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	17.3
+Version:	17.4
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	1d0bb2d54dfe1bb6844756b99902ba20
+# Source0-md5:	3d33c4c6bd7950240dcd7479edd9c7d8
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	6aa12c96d8d58ecc7be855c99286fc61
+# Source1-md5:	9dfbf1d6b4a33f276fc75fc7d8c1cd93
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
-Patch1:		otp-0007-Added-systemd-notify-support-to-EPMD.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf
@@ -66,7 +65,6 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
-%patch1 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -153,6 +151,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
 %attr(755,root,root) %{_libdir}/%{name}/bin/escript
+%attr(755,root,root) %{_libdir}/%{name}/bin/no_dot_erlang.boot
 %attr(755,root,root) %{_libdir}/%{name}/bin/run_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/bin/start_erl
