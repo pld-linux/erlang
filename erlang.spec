@@ -14,16 +14,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	17.4
+Version:	17.5
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	distributable
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	3d33c4c6bd7950240dcd7479edd9c7d8
+# Source0-md5:	346dd0136bf1cc28cebc140e505206bb
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	9dfbf1d6b4a33f276fc75fc7d8c1cd93
+# Source1-md5:	91fcea4e95a5802f153fe547b96792a5
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
