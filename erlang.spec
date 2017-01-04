@@ -14,16 +14,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	17.5
+Version:	19.2
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
-License:	distributable
+License:	APLv2
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	346dd0136bf1cc28cebc140e505206bb
+# Source0-md5:	7cdd18a826dd7bda0ca46d1c3b2efca6
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	91fcea4e95a5802f153fe547b96792a5
+# Source1-md5:	4464aa2a63196880883de9636e177cff
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -133,7 +133,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS EPLICENCE COPYRIGHT
+%doc AUTHORS COPYRIGHT
 %attr(755,root,root) %{_bindir}/ct_run
 %attr(755,root,root) %{_bindir}/dialyzer
 %attr(755,root,root) %{_bindir}/epmd
@@ -166,7 +166,6 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/%{name}/erts-*/*.ear
 %dir %{_libdir}/%{name}/erts-*/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/child*
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/ct_run
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dyn_erl
