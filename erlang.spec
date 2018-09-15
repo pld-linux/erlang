@@ -15,7 +15,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	20.3
-Release:	1
+Release:	2
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
