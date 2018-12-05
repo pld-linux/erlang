@@ -15,7 +15,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	21.1
-Release:	1
+Release:	2
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -29,6 +29,7 @@ Source3:	epmd.socket
 Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
+Patch1:		x32.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf
@@ -49,7 +50,7 @@ Requires:	systemd-units >= 38
 Requires(post,preun,postun):	systemd-units >= 38
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define _erl_target %(echo %{_build}-gnu | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/')
+%define _erl_target %(echo %{_build}%{?_gnu} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/;s/x32/x86_64/')
 
 %description
 Erlang is a programming language designed at the Ericsson Computer
@@ -65,6 +66,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp_src_%{_version}
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
+%patch1 -p1
 
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
@@ -77,6 +79,9 @@ done
 %configure \
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
+%endif
+%ifarch x32
+	--disable-hipe \
 %endif
 	--disable-silent-rules \
 	--enable-smp-support \
