@@ -14,16 +14,16 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	20.3
-Release:	2
+Version:	21.1
+Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	a683c8c0aacfe0305c4bf47b3abfde6a
+# Source0-md5:	482f91cf34c2ffb1dff6e716a15afefa
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	9cce536d5b60d56834c90740d5259c23
+# Source1-md5:	53b7ce5694da49f3bddadc4d0fafd94c
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -142,6 +142,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/escript
 %attr(755,root,root) %{_bindir}/run_erl
 %attr(755,root,root) %{_bindir}/to_erl
+%attr(755,root,root) %{_bindir}/typer
 %dir %{_libdir}/erlang
 %dir %{_libdir}/%{name}/bin
 %attr(755,root,root) %{_libdir}/%{name}/bin/ct_run
