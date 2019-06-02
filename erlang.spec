@@ -104,8 +104,15 @@ install -D -p %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.socket
 install -D -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.service
 install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 
-sed -i -e"s#$RPM_BUILD_ROOT##" \
+%{__sed} -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
+
+%{__sed} -i -e '1s,/usr/bin/env escript,/usr/bin/escript,' \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/diameter-*/bin/diameterc \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/erl_docgen-*/priv/bin/{codeline_preprocessing,xml_from_edoc}.escript \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/reltool-*/examples/{display_args,mnesia_core_dump_viewer} \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/bin/snmpc \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/src/compiler/snmpc.src
 
 cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
@@ -113,11 +120,11 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
 # some files in the library need +x, so we build the list here
 echo "%%defattr(644,root,root,755)" > lib.list
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type d \
-	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%dir %%{_libdir}/%%{name}/#" >> lib.list
+	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%dir %%{_libdir}/%%{name}/#" >> lib.list
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
-	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%attr(755,root,root) %%{_libdir}/%%{name}/#" >> lib.list
+	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%attr(755,root,root) %%{_libdir}/%%{name}/#" >> lib.list
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
-	| sed -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
+	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
 %{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib
 %{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
