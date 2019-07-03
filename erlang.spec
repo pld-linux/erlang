@@ -14,21 +14,23 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	19.2
+Version:	19.3
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	7cdd18a826dd7bda0ca46d1c3b2efca6
+# Source0-md5:	a8c259ec47bf84e77510673e1b76b6db
 Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	4464aa2a63196880883de9636e177cff
+# Source1-md5:	63f115d98934f4483a0341c567193747
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
+Patch1:		git.patch
+Patch2:		openssl.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf
@@ -66,6 +68,9 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %{__tar} xzf %{SOURCE1} man/ COPYRIGHT
 #%patch0 -p1
 
+%patch1 -p1
+%patch2 -p1
+
 %build
 find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
 curd=$(pwd)
@@ -80,7 +85,8 @@ done
 %endif
 	--disable-silent-rules \
 	--enable-smp-support \
-	--with-javac%{!?with_java:=no}
+	--with-javac%{!?with_java:=no} \
+	--with-ssl
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
  %{__make} -j1 \

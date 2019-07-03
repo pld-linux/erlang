@@ -1,0 +1,448 @@
+commit 25aa0128340d819e85e641f0ef8b9e0fd5fdda0b
+Author: Björn Gustavsson <bjorn@erlang.org>
+Date:   Tue Nov 29 07:45:15 2016 +0100
+
+    configure.in: Fix test for SSL with Kerberos
+    
+    OpenSSL 1.1.0 and higher does not support Kerberos and no longer
+    defines OPENSSL_NO_KRB5 to indicate that. Test the version number
+    as well as OPENSSL_NO_KRB5.
+
+diff --git a/erts/configure.in b/erts/configure.in
+index 98f3e6bcc5..fd7dc783f3 100644
+--- a/erts/configure.in
++++ b/erts/configure.in
+@@ -4447,12 +4447,14 @@ esac
+ 
+ if test "x$SSL_APP" != "x" ; then
+     dnl We found openssl, now check if we use kerberos 5 support
++    dnl FIXME: Do we still support platforms that have Kerberos?
+     AC_MSG_CHECKING(for OpenSSL kerberos 5 support)
+     old_CPPFLAGS=$CPPFLAGS
+     CPPFLAGS=$SSL_INCLUDE
+     AC_EGREP_CPP(^yes$,[
++#include <openssl/opensslv.h>
+ #include <openssl/opensslconf.h>
+-#ifndef OPENSSL_NO_KRB5
++#if OPENSSL_VERSION_NUMBER < 0x1010000fL && !defined(OPENSSL_NO_KRB5)
+ yes
+ #endif
+       ],[
+commit e30294f44d02200c20a80f1a3a2bb075afc3747d
+Author: Björn Gustavsson <bjorn@erlang.org>
+Date:   Thu Nov 24 10:11:13 2016 +0100
+
+    configure.in: Fix configure test for usable OpenSSL
+    
+    In OpenSSL 1.1.0, HMAC_CTX no longer has a complete definition,
+    and can no longer be allocated as a stack variable. Therefore,
+    the code in the configure test for usable OpenSSL library will
+    not compile.
+    
+    Call the HMAC() function instead since it exists in all versions of
+    of OpenSSL that we support. Note that the code will only be compiled
+    and linked, not run, so the argument values don't matter as long as
+    they have the correct type.
+
+diff --git a/erts/configure.in b/erts/configure.in
+index fd7dc783f3..2018e19b76 100644
+--- a/erts/configure.in
++++ b/erts/configure.in
+@@ -4285,8 +4285,7 @@ yes
+ 					#include <stdio.h>
+  					#include <openssl/hmac.h>],
+  					[ 
+- 					HMAC_CTX hc;
+- 					HMAC_CTX_init(&hc);		
++					HMAC(0, 0, 0, 0, 0, 0, 0);
+  					],
+  					[ssl_linkable=yes],
+  					[ssl_linkable=no])
+@@ -4341,8 +4340,7 @@ dnl		so it is - be adoptable
+ 			#include <stdio.h>
+  			#include <openssl/hmac.h>],
+  			[ 
+- 			HMAC_CTX hc;
+- 			HMAC_CTX_init(&hc);		
++			HMAC(0, 0, 0, 0, 0, 0, 0);
+  			],
+  			[ssl_dyn_linkable=yes],
+  			[ssl_dyn_linkable=no])
+@@ -4605,8 +4603,7 @@ yes)   # Use standard lib locations for ssl runtime library path
+                          #include <openssl/hmac.h>
+                     ],
+                     [ 
+-                         HMAC_CTX hc;
+-                         HMAC_CTX_init(&hc);		
++			 HMAC(0, 0, 0, 0, 0, 0, 0);
+                     ],
+                     [rpath_success=yes],
+                     [rpath_success=no])
+commit 78a5de9611c25a4e7b5248aa9828f949f3a5c131
+Author: Björn Gustavsson <bjorn@erlang.org>
+Date:   Thu Nov 24 10:55:10 2016 +0100
+
+    crypto.c: Disable broken code for ChaCha and Poly1305
+    
+    In June 2014, fb9d36c2c7c1 added support for the AES GCM ciphers
+    (ChaCha/Poly1305) based on a development version of OpenSSL 1.1.0.
+    The code is seriously broken when used with the released OpenSSL 1.1.0.
+
+diff --git a/lib/crypto/c_src/crypto.c b/lib/crypto/c_src/crypto.c
+index 86b839eddb..554aaf7587 100644
+--- a/lib/crypto/c_src/crypto.c
++++ b/lib/crypto/c_src/crypto.c
+@@ -138,6 +138,13 @@
+ #include <openssl/ecdsa.h>
+ #endif
+ 
++/*
++ * FIXME: The support for ChaCha and Poly1305 is based on pre-releases
++ * of OpenSSL 1.1.0. It is seriously broken when used with the released
++ * OpenSSL 1.1.0 or later.
++ */
++#undef HAVE_CHACHA20_POLY1305
++
+ #if defined(HAVE_CHACHA20_POLY1305)
+ #include <openssl/chacha.h>
+ #include <openssl/poly1305.h>
+commit 1cdaf0a6fd8dbbf08fe88dd148424df4da683f48
+Author: Petr Gotthard <petr.gotthard@centrum.cz>
+Date:   Sat Jul 30 10:51:47 2016 -0700
+
+    crypto:cmac calculating the Cipher-based Message Authentication Code
+    
+    The ERL-82 issue requests a way to calculate a CMAC in Erlang. The
+    AES128 CMAC is standartized in RFC 4493 and used e.g. for message
+    authentication in the LoRaWAN networks.
+    
+    The CMAC is implemented by OpenSSL since v1.0.1, but as @IngelaAndin
+    stated in response to the ERL-82, the current crypto implementation
+    does not include functions that call those OpenSSL cryptolib functions.
+    
+    This commit introduces a new function `crypto:cmac` that calls
+    the corresponding OpenSSL functions and calculates the CMAC.
+    
+    Only the cmac_nif is implemented. The incremental functions (init,
+    update, final) are not provided because the current OpenSSL does
+    not allow custom memory allocators like `enif_alloc_resource`.
+    
+    The Erlang user guide states that at least OpenSSL 0.9.8 is required,
+    so I added few #ifdefs so the code is compatible with all versions.
+    However, the OpenSSL pages say that the pre-1.0.1 versions (0.9.8 and
+    1.0.0) are no longer maintained. Even the 1.0.1 will be retired by
+    Dec 2016. Hence I believe that adding a 1.0.1-only function like CMAC
+    should be OK.
+
+diff --git a/lib/crypto/c_src/crypto.c b/lib/crypto/c_src/crypto.c
+index 7183c395ae..240bfc8341 100644
+--- a/lib/crypto/c_src/crypto.c
++++ b/lib/crypto/c_src/crypto.c
+@@ -108,6 +108,7 @@
+ #if OPENSSL_VERSION_NUMBER >= OpenSSL_version_plain(1,0,1)
+ # define HAVE_EVP_AES_CTR
+ # define HAVE_GCM
++# define HAVE_CMAC
+ # if OPENSSL_VERSION_NUMBER < OpenSSL_version(1,0,1,'d')
+ #  define HAVE_GCM_EVP_DECRYPT_BUG
+ # endif
+@@ -121,6 +122,10 @@
+ # define HAVE_ECB_IVEC_BUG
+ #endif
+ 
++#if defined(HAVE_CMAC)
++#include <openssl/cmac.h>
++#endif
++
+ #if defined(HAVE_EC)
+ #include <openssl/ec.h>
+ #include <openssl/ecdh.h>
+@@ -224,6 +229,7 @@ static ERL_NIF_TERM hmac_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
+ static ERL_NIF_TERM hmac_init_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ static ERL_NIF_TERM hmac_update_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ static ERL_NIF_TERM hmac_final_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
++static ERL_NIF_TERM cmac_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ static ERL_NIF_TERM block_crypt_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ static ERL_NIF_TERM aes_cfb_8_crypt(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ static ERL_NIF_TERM aes_ige_crypt_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+@@ -294,6 +300,7 @@ static ErlNifFunc nif_funcs[] = {
+     {"hmac_update_nif", 2, hmac_update_nif},
+     {"hmac_final_nif", 1, hmac_final_nif},
+     {"hmac_final_nif", 2, hmac_final_nif},
++    {"cmac_nif", 3, cmac_nif},
+     {"block_crypt_nif", 5, block_crypt_nif},
+     {"block_crypt_nif", 4, block_crypt_nif},
+     {"aes_ige_crypt_nif", 4, aes_ige_crypt_nif},
+@@ -1346,6 +1353,53 @@ static ERL_NIF_TERM hmac_final_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM
+     return ret;
+ }
+ 
++static ERL_NIF_TERM cmac_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
++{/* (Type, Key, Data) */
++#if defined(HAVE_CMAC)
++    struct cipher_type_t *cipherp = NULL;
++    const EVP_CIPHER     *cipher;
++    CMAC_CTX             *ctx;
++    ErlNifBinary         key;
++    ErlNifBinary         data;
++    ERL_NIF_TERM         ret;
++    unsigned             ret_size;
++
++    if (!enif_inspect_iolist_as_binary(env, argv[1], &key)
++        || !(cipherp = get_cipher_type(argv[0], key.size))
++        || !enif_inspect_iolist_as_binary(env, argv[2], &data)) {
++        return enif_make_badarg(env);
++    }
++    cipher = cipherp->cipher.p;
++    if (!cipher) {
++        return enif_raise_exception(env, atom_notsup);
++    }
++
++    ctx = CMAC_CTX_new();
++    if (!CMAC_Init(ctx, key.data, key.size, cipher, NULL)) {
++        CMAC_CTX_free(ctx);
++        return atom_notsup;
++    }
++
++    if (!CMAC_Update(ctx, data.data, data.size) ||
++        !CMAC_Final(ctx,
++                    enif_make_new_binary(env, EVP_CIPHER_block_size(cipher), &ret),
++                    &ret_size)) {
++        CMAC_CTX_free(ctx);
++        return atom_notsup;
++    }
++    ASSERT(ret_size == (unsigned)EVP_CIPHER_block_size(cipher));
++
++    CMAC_CTX_free(ctx);
++    CONSUME_REDS(env, data);
++    return ret;
++#else
++    /* The CMAC functionality was introduced in OpenSSL 1.0.1
++     * Although OTP requires at least version 0.9.8, the versions 0.9.8 and 1.0.0 are
++     * no longer maintained. */
++    return atom_notsup;
++#endif
++}
++
+ static ERL_NIF_TERM block_crypt_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ {/* (Type, Key, Ivec, Text, IsEncrypt) or (Type, Key, Text, IsEncrypt) */
+     struct cipher_type_t *cipherp = NULL;
+diff --git a/lib/crypto/doc/src/crypto.xml b/lib/crypto/doc/src/crypto.xml
+index 5a5627747c..728233d226 100644
+--- a/lib/crypto/doc/src/crypto.xml
++++ b/lib/crypto/doc/src/crypto.xml
+@@ -453,6 +453,24 @@
+       </desc>
+     </func>
+ 
++    <func>
++      <name>cmac(Type, Key, Data) -> Mac</name>
++      <name>cmac(Type, Key, Data, MacLength) -> Mac</name>
++      <fsummary>Calculates the Cipher-based Message Authentication Code.</fsummary>
++      <type>
++        <v>Type = block_cipher()</v>
++        <v>Key = iodata()</v>
++        <v>Data = iodata()</v>
++        <v>MacLength = integer()</v>
++        <v>Mac = binary()</v>
++      </type>
++      <desc>
++        <p>Computes a CMAC of type <c>Type</c> from <c>Data</c> using
++        <c>Key</c> as the authentication key.</p> <p><c>MacLength</c>
++        will limit the size of the resultant <c>Mac</c>.</p>
++      </desc>
++    </func>
++
+     <func>
+       <name>info_lib() -> [{Name,VerNum,VerStr}]</name>
+       <fsummary>Provides information about the libraries used by crypto.</fsummary>
+diff --git a/lib/crypto/src/crypto.erl b/lib/crypto/src/crypto.erl
+index 025d57e9c5..ba824eb9cd 100644
+--- a/lib/crypto/src/crypto.erl
++++ b/lib/crypto/src/crypto.erl
+@@ -27,6 +27,7 @@
+ -export([sign/4, verify/5]).
+ -export([generate_key/2, generate_key/3, compute_key/4]).
+ -export([hmac/3, hmac/4, hmac_init/2, hmac_update/2, hmac_final/1, hmac_final_n/2]).
++-export([cmac/3, cmac/4]).
+ -export([exor/2, strong_rand_bytes/1, mod_pow/3]).
+ -export([rand_uniform/2]).
+ -export([block_encrypt/3, block_decrypt/3, block_encrypt/4, block_decrypt/4]).
+@@ -271,6 +272,14 @@ hmac_final(Context) ->
+ hmac_final_n(Context, HashLen) ->
+     notsup_to_error(hmac_final_nif(Context, HashLen)).
+ 
++-spec cmac(_, iodata(), iodata()) -> binary().
++-spec cmac(_, iodata(), iodata(), integer()) -> binary().
++
++cmac(Type, Key, Data) ->
++    notsup_to_error(cmac_nif(Type, Key, Data)).
++cmac(Type, Key, Data, MacSize) ->
++    erlang:binary_part(cmac(Type, Key, Data), 0, MacSize).
++
+ %% Ecrypt/decrypt %%%
+ 
+ -spec block_encrypt(des_cbc | des_cfb |
+@@ -782,6 +791,10 @@ hmac_update_nif(_Context, _Data) -> ?nif_stub.
+ hmac_final_nif(_Context) -> ?nif_stub.
+ hmac_final_nif(_Context, _MacSize) -> ?nif_stub.
+ 
++%% CMAC
++
++cmac_nif(_Type, _Key, _Data) -> ?nif_stub.
++
+ %%
+ %%  MD5_MAC
+ %%
+@@ -1460,6 +1473,7 @@ mod_exp_nif(_Base,_Exp,_Mod,_bin_hdr) -> ?nif_stub.
+ 
+ -define(FUNC_LIST, [hash, hash_init, hash_update, hash_final,
+ 		    hmac, hmac_init, hmac_update, hmac_final, hmac_final_n,
++		    cmac,
+ 		    %% deprecated
+ 		    md4, md4_init, md4_update, md4_final,
+ 		    md5, md5_init, md5_update, md5_final,
+diff --git a/lib/crypto/test/crypto_SUITE.erl b/lib/crypto/test/crypto_SUITE.erl
+index 6732f27824..90514821a8 100644
+--- a/lib/crypto/test/crypto_SUITE.erl
++++ b/lib/crypto/test/crypto_SUITE.erl
+@@ -95,10 +95,10 @@ groups() ->
+      {des_ede3,[], [block]},
+      {des3_cbf,[], [block]},
+      {rc2_cbc,[], [block]},
+-     {aes_cbc128,[], [block]},
++     {aes_cbc128,[], [block, cmac]},
+      {aes_cfb8,[], [block]},
+      {aes_cfb128,[], [block]},
+-     {aes_cbc256,[], [block]},
++     {aes_cbc256,[], [block, cmac]},
+      {aes_ecb,[], [block]},
+      {aes_ige256,[], [block]},
+      {blowfish_cbc, [], [block]},
+@@ -194,6 +194,13 @@ hmac(Config) when is_list(Config) ->
+     hmac(Type, lists:map(fun iolistify/1, Keys), lists:map(fun iolistify/1, Data), Expected),
+     hmac_increment(Type).
+ %%--------------------------------------------------------------------
++cmac() ->
++     [{doc, "Test all different cmac functions"}].
++cmac(Config) when is_list(Config) ->
++    Pairs = proplists:get_value(cmac, Config),
++    lists:foreach(fun cmac_check/1, Pairs),
++    lists:foreach(fun cmac_check/1, cmac_iolistify(Pairs)).
++%%--------------------------------------------------------------------
+ block() ->
+      [{doc, "Test block ciphers"}].
+ block(Config) when is_list(Config) ->
+@@ -346,6 +353,23 @@ hmac_increment(State0, [Increment | Rest]) ->
+     State = crypto:hmac_update(State0, Increment),
+     hmac_increment(State, Rest).
+ 
++cmac_check({Type, Key, Text, CMac}) ->
++    ExpCMac = iolist_to_binary(CMac),
++    case crypto:cmac(Type, Key, Text) of
++        ExpCMac ->
++            ok;
++        Other ->
++            ct:fail({{crypto, cmac, [Type, Key, Text]}, {expected, ExpCMac}, {got, Other}})
++    end;
++cmac_check({Type, Key, Text, Size, CMac}) ->
++    ExpCMac = iolist_to_binary(CMac),
++    case crypto:cmac(Type, Key, Text, Size) of
++        ExpCMac ->
++            ok;
++        Other ->
++            ct:fail({{crypto, cmac, [Type, Key, Text, Size]}, {expected, ExpCMac}, {got, Other}})
++    end.
++
+ block_cipher({Type, Key,  PlainText}) ->
+     Plain = iolist_to_binary(PlainText),
+     CipherText = crypto:block_encrypt(Type, Key, PlainText),
+@@ -566,11 +590,18 @@ mkint(C) when $a =< C, C =< $f ->
+ is_supported(Group) ->
+     lists:member(Group, lists:append([Algo ||  {_, Algo}  <- crypto:supports()])). 
+ 
++cmac_iolistify(Blocks) ->
++    lists:map(fun do_cmac_iolistify/1, Blocks).
+ block_iolistify(Blocks) ->
+     lists:map(fun do_block_iolistify/1, Blocks).
+ stream_iolistify(Streams) ->
+     lists:map(fun do_stream_iolistify/1, Streams).
+ 
++do_cmac_iolistify({Type, Key, Text, CMac}) ->
++    {Type, iolistify(Key), iolistify(Text), CMac};
++do_cmac_iolistify({Type, Key, Text, Size, CMac}) ->
++    {Type, iolistify(Key), iolistify(Text), Size, CMac}.
++
+ do_stream_iolistify({Type, Key, PlainText}) ->
+     {Type, iolistify(Key), iolistify(PlainText)};
+ do_stream_iolistify({Type, Key, IV, PlainText}) ->
+@@ -798,12 +829,14 @@ group_config(des_ede3, Config) ->
+ group_config(rc2_cbc, Config) ->
+     Block = rc2_cbc(),
+     [{block, Block} | Config];
+-group_config(aes_cbc128, Config) ->
++group_config(aes_cbc128 = Type, Config) ->
+     Block = aes_cbc128(),
+-    [{block, Block} | Config];
+-group_config(aes_cbc256, Config) ->
++    Pairs = cmac_nist(Type),
++    [{block, Block}, {cmac, Pairs} | Config];
++group_config(aes_cbc256 = Type, Config) ->
+     Block = aes_cbc256(),
+-    [{block, Block} | Config];
++    Pairs = cmac_nist(Type),
++    [{block, Block}, {cmac, Pairs} | Config];
+ group_config(aes_ecb, Config) ->
+     Block = aes_ecb(),
+     [{block, Block} | Config];    
+@@ -2324,6 +2357,50 @@ ecc() ->
+                  end,
+                  TestCases).
+ 
++%% Test data from Appendix D of NIST Special Publication 800-38B
++%% http://csrc.nist.gov/publications/nistpubs/800-38B/Updated_CMAC_Examples.pdf
++%% The same AES128 test data are also in the RFC 4493
++%% https://tools.ietf.org/html/rfc4493
++cmac_nist(aes_cbc128 = Type) ->
++    Key = hexstr2bin("2b7e151628aed2a6abf7158809cf4f3c"),
++    [{Type, Key, <<"">>,
++                 hexstr2bin("bb1d6929e95937287fa37d129b756746")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"),
++                hexstr2bin("070a16b46b4d4144f79bdd9dd04a287c")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"
++                           "ae2d8a571e03ac9c9eb76fac45af8e51"
++                           "30c81c46a35ce411"),
++                hexstr2bin("dfa66747de9ae63030ca32611497c827")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"
++                           "ae2d8a571e03ac9c9eb76fac45af8e51"
++                           "30c81c46a35ce411e5fbc1191a0a52ef"
++                           "f69f2445df4f9b17ad2b417be66c3710"),
++                hexstr2bin("51f0bebf7e3b9d92fc49741779363cfe")},
++    % truncation
++    {Type, Key, <<"">>, 4,
++                 hexstr2bin("bb1d6929")}];
++
++cmac_nist(aes_cbc256 = Type) ->
++    Key = hexstr2bin("603deb1015ca71be2b73aef0857d7781"
++                     "1f352c073b6108d72d9810a30914dff4"),
++    [{Type, Key, <<"">>,
++                 hexstr2bin("028962f61b7bf89efc6b551f4667d983")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"),
++                hexstr2bin("28a7023f452e8f82bd4bf28d8c37c35c")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"
++                           "ae2d8a571e03ac9c9eb76fac45af8e51"
++                           "30c81c46a35ce411"),
++                hexstr2bin("aaf3d8f1de5640c232f5b169b9c911e6")},
++    {Type, Key, hexstr2bin("6bc1bee22e409f96e93d7e117393172a"
++                           "ae2d8a571e03ac9c9eb76fac45af8e51"
++                           "30c81c46a35ce411e5fbc1191a0a52ef"
++                           "f69f2445df4f9b17ad2b417be66c3710"),
++                hexstr2bin("e1992190549f6ed5696a2c056c315410")},
++    % truncation
++    {Type, Key, <<"">>, 4,
++                 hexstr2bin("028962f6")}].
++
++
+ no_padding() ->
+     Public = [_, Mod] = rsa_public(),
+     Private = rsa_private(),
