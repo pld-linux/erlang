@@ -14,16 +14,14 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	21.1
-Release:	2
+Version:	21.3.8.6
+Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
-Source0:	http://www.erlang.org/download/otp_src_%{_version}.tar.gz
-# Source0-md5:	482f91cf34c2ffb1dff6e716a15afefa
-Source1:	http://www.erlang.org/download/otp_doc_man_%{_version}.tar.gz
-# Source1-md5:	53b7ce5694da49f3bddadc4d0fafd94c
+Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
+# Source0-md5:	a5fbab93f78c4db98ecc11ce75f67ac4
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -63,19 +61,13 @@ Laboratory. Open-source Erlang został wydany, aby pomóc w
 rozpowszechnianiu Erlanga poza Ericssonem.
 
 %prep
-%setup -q -n otp_src_%{_version}
-%{__tar} xzf %{SOURCE1} man/ COPYRIGHT
+%setup -q -n otp-OTP-%{_version}
 #%patch0 -p1
 %patch1 -p1
 
 %build
-find . -name config.sub | xargs -n 1 cp -f /usr/share/automake/config.sub
-curd=$(pwd)
-for i in $(find . -type f -name configure.in); do
-	cd $(dirname $i)
-	%{__autoconf}
-	cd $curd
-done
+./otp_build autoconf
+
 %configure \
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
@@ -92,12 +84,18 @@ ERL_TOP=`pwd`; export ERL_TOP
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
+%{__make} -j1 docs
+
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} -j1 install \
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
+
+env ERL_LIBS="$RPM_BUILD_ROOT%{_libdir}/erlang/lib" \
+	%{__make} install-docs \
+		DESTDIR=$RPM_BUILD_ROOT
 
 install -D -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.service
 install -D -p %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.socket
@@ -114,8 +112,8 @@ install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/bin/snmpc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/src/compiler/snmpc.src
 
-cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
-find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
+#cp -r man $RPM_BUILD_ROOT%{_libdir}/%{name}
+#find $RPM_BUILD_ROOT%{_libdir}/%{name}/man -type f | xargs gzip -9
 
 # some files in the library need +x, so we build the list here
 echo "%%defattr(644,root,root,755)" > lib.list
@@ -145,7 +143,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS COPYRIGHT
+%doc AUTHORS
 %attr(755,root,root) %{_bindir}/ct_run
 %attr(755,root,root) %{_bindir}/dialyzer
 %attr(755,root,root) %{_bindir}/epmd
