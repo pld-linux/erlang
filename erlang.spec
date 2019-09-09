@@ -28,6 +28,8 @@ Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
+# disable pdf docs (require libxslt-progs and fop > 1.0, with -cache option)
+Patch2:		%{name}-no-fop.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf
@@ -64,6 +66,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 %setup -q -n otp-OTP-%{_version}
 #%patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 ./otp_build autoconf
