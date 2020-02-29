@@ -14,14 +14,14 @@
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	22.2.4
+Version:	22.2.8
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	ab584b0235f1f41284b026d9a8f35426
+# Source0-md5:	52b1f68278a756b1fd747d1f9b2c5f4c
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
