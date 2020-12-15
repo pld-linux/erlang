@@ -40,6 +40,7 @@ BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 BuildRequires:	openssl-tools
 BuildRequires:	perl-base
+BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
@@ -61,6 +62,19 @@ encourage the spread of Erlang outside Ericsson.
 Erlang to język programowania opracowany w Ericsson Computer Science
 Laboratory. Open-source Erlang został wydany, aby pomóc w
 rozpowszechnianiu Erlanga poza Ericssonem.
+
+%package doc
+Summary:	Erlang documentation
+Summary(pl.UTF-8):	Dokumentacja do Erlanga
+Group:		Documentation
+Requires:	%{name} = %{version}-%{release}
+%{?noarchpackage}
+
+%description doc
+Erlang documentation.
+
+%description doc -l pl.UTF-8
+Dokumentacja do Erlanga.
 
 %prep
 %setup -q -n otp-OTP-%{_version}
@@ -172,7 +186,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-*
-%{_libdir}/%{name}/erts-*/doc
 %{_libdir}/%{name}/erts-*/man
 %{_libdir}/%{name}/erts-*/src
 %{_libdir}/%{name}/erts-*/include
@@ -202,3 +215,8 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/epmd.socket
 %{systemdunitdir}/epmd@.service
 %{systemdunitdir}/epmd@.socket
+
+%files doc
+%defattr(644,root,root,755)
+%{_libdir}/%{name}/doc
+%{_libdir}/%{name}/erts-*/doc
