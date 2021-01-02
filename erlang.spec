@@ -15,7 +15,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	22.3.4.13
-Release:	1
+Release:	2
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -67,7 +67,7 @@ rozpowszechnianiu Erlanga poza Ericssonem.
 Summary:	Erlang documentation
 Summary(pl.UTF-8):	Dokumentacja do Erlanga
 Group:		Documentation
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
 %{?noarchpackage}
 
 %description doc
