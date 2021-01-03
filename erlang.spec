@@ -18,7 +18,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	22.3.4.13
-Release:	3
+Release:	4
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -232,5 +232,6 @@ rm -rf $RPM_BUILD_ROOT
 %files doc
 %defattr(644,root,root,755)
 %dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/erts-%{erts_version}
 %{_datadir}/%{name}/doc
 %{_datadir}/%{name}/erts-%{erts_version}/doc
