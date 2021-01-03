@@ -11,11 +11,14 @@
 %bcond_with	java		# with Java support
 %bcond_without	odbc		# without unixODBC support
 #
+
+%define		erts_version	10.7.2.6
+
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	22.3.4.13
-Release:	2
+Release:	3
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -141,8 +144,15 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
-%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/lib
-%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-*/include/internal
+%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/lib
+%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/include/internal
+
+# Move noarch docs to _datadir
+install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/erts-%{erts_version}
+%{__mv} $RPM_BUILD_ROOT{%{_libdir},%{_datadir}}/%{name}/doc
+%{__ln} -s %{_datadir}/%{name}/doc $RPM_BUILD_ROOT%{_libdir}/%{name}/doc
+%{__mv} $RPM_BUILD_ROOT{%{_libdir},%{_datadir}}/%{name}/erts-%{erts_version}/doc
+%{__ln} -s %{_datadir}/%{name}/erts-%{erts_version}/doc $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/doc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -185,24 +195,24 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/to_erl
 %attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
-%dir %{_libdir}/%{name}/erts-*
-%{_libdir}/%{name}/erts-*/man
-%{_libdir}/%{name}/erts-*/src
-%{_libdir}/%{name}/erts-*/include
-#%{_libdir}/%{name}/erts-*/*.ear
-%dir %{_libdir}/%{name}/erts-*/bin
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/beam*
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/ct_run
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dialyzer
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/dyn_erl
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/e*
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/heart*
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/inet_gethost
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/run_erl
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/start
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/to_erl
-%attr(755,root,root) %{_libdir}/%{name}/erts-*/bin/typer
-%{_libdir}/%{name}/erts-*/bin/start*.*
+%dir %{_libdir}/%{name}/erts-%{erts_version}
+%{_libdir}/%{name}/erts-%{erts_version}/man
+%{_libdir}/%{name}/erts-%{erts_version}/src
+%{_libdir}/%{name}/erts-%{erts_version}/include
+#%{_libdir}/%{name}/erts-%{erts_version}/*.ear
+%dir %{_libdir}/%{name}/erts-%{erts_version}/bin
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/beam*
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/ct_run
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/dialyzer
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/dyn_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/e*
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/heart*
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/inet_gethost
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/run_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/start
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/to_erl
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/typer
+%{_libdir}/%{name}/erts-%{erts_version}/bin/start*.*
 # (file list dynamically generated) %{_libdir}/%{name}/lib
 %dir %{_libdir}/%{name}/misc
 %attr(755,root,root) %{_libdir}/%{name}/misc/*
@@ -211,6 +221,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_libdir}/%{name}/man
 %attr(755,root,root) %{_libdir}/%{name}/Install
 
+%{_libdir}/%{name}/doc
+%{_libdir}/%{name}/erts-%{erts_version}/doc
+
 %{systemdunitdir}/epmd.service
 %{systemdunitdir}/epmd.socket
 %{systemdunitdir}/epmd@.service
@@ -218,5 +231,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files doc
 %defattr(644,root,root,755)
-%{_libdir}/%{name}/doc
-%{_libdir}/%{name}/erts-*/doc
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/doc
+%{_datadir}/%{name}/erts-%{erts_version}/doc
