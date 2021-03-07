@@ -71,7 +71,7 @@ Summary:	Erlang documentation
 Summary(pl.UTF-8):	Dokumentacja do Erlanga
 Group:		Documentation
 Requires:	%{name} = %{epoch}:%{version}-%{release}
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description doc
 Erlang documentation.
