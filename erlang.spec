@@ -12,19 +12,19 @@
 %bcond_without	odbc		# without unixODBC support
 #
 
-%define		erts_version	10.7.2.6
+%define		erts_version	12.1.2
 
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	22.3.4.13
-Release:	4
+Version:	24.1.2
+Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	598bf13135cd2678eef0368cb3818273
+# Source0-md5:	103fb735f9510574c1bbbd12690c5b63
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -33,6 +33,7 @@ Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
 # disable pdf docs (require libxslt-progs and fop > 1.0, with -cache option)
 Patch2:		%{name}-no-fop.patch
+Patch3:		ssl.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf
@@ -84,6 +85,7 @@ Dokumentacja do Erlanga.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 ./otp_build autoconf
@@ -127,6 +129,7 @@ install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 
 %{__sed} -i -e '1s,/usr/bin/env escript,/usr/bin/escript,' \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/diameter-*/bin/diameterc \
+	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/edoc-*/bin/edoc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/erl_docgen-*/priv/bin/{codeline_preprocessing,xml_from_edoc}.escript \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/reltool-*/examples/{display_args,mnesia_core_dump_viewer} \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/bin/snmpc \
@@ -143,9 +146,6 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%attr(755,root,root) %%{_libdir}/%%{name}/#" >> lib.list
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
-
-%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/lib
-%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/include/internal
 
 # Move noarch docs to _datadir
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/erts-%{erts_version}
@@ -186,6 +186,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/dialyzer
 %attr(755,root,root) %{_libdir}/%{name}/bin/epmd
 %attr(755,root,root) %{_libdir}/%{name}/bin/erl
+%attr(755,root,root) %{_libdir}/%{name}/bin/erl_call
 %attr(755,root,root) %{_libdir}/%{name}/bin/erlc
 %attr(755,root,root) %{_libdir}/%{name}/bin/escript
 %attr(755,root,root) %{_libdir}/%{name}/bin/no_dot_erlang.boot
@@ -212,6 +213,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/start
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/to_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/typer
+%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/yielding_c_fun
 %{_libdir}/%{name}/erts-%{erts_version}/bin/start*.*
 # (file list dynamically generated) %{_libdir}/%{name}/lib
 %dir %{_libdir}/%{name}/misc

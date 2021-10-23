@@ -1,0 +1,35 @@
+--- otp-OTP-24.1.2/lib/crypto/c_src/openssl_config.h~	2021-10-23 23:10:12.000000000 +0200
++++ otp-OTP-24.1.2/lib/crypto/c_src/openssl_config.h	2021-10-23 23:12:25.743124654 +0200
+@@ -53,8 +53,18 @@
+ /* Helper macro to construct a OPENSSL_VERSION_NUMBER.
+  * See openssl/opensslv.h
+  */
+-#define PACKED_OPENSSL_VERSION(MAJ, MIN, FIX, P)	\
+-    ((((((((MAJ << 8) | MIN) << 8 ) | FIX) << 8) | (P-'a'+1)) << 4) | 0xf)
++#if defined(OPENSSL_VERSION_MAJOR) && \
++    (OPENSSL_VERSION_MAJOR >= 3)
++
++# define PACKED_OPENSSL_VERSION(MAJ, MIN, PATCH, VOID)   \
++         (((((MAJ << 8) | MIN) << 16 ) | PATCH) << 4)
++#else
++/* Pre 3.0.0 */
++#  define PACKED_OPENSSL_VERSION(MAJ, MIN, FIX, P)                        \
++          ((((((((MAJ << 8) | MIN) << 8 ) | FIX) << 8) | (P-'a'+1)) << 4) | 0xf)
++
+++/* End Pre 3.0.0 */
++#endif
+ 
+ #define PACKED_OPENSSL_VERSION_PLAIN(MAJ, MIN, FIX) \
+     PACKED_OPENSSL_VERSION(MAJ,MIN,FIX,('a'-1))
+@@ -437,6 +437,11 @@ do {
+ # undef FIPS_SUPPORT
+ #endif
+ 
++/* Disable FIPS until erlang properly supports it with new openssl */
++#if OPENSSL_VERSION_NUMBER >= PACKED_OPENSSL_VERSION_PLAIN(3,0,0)
++# undef FIPS_SUPPORT
++# define FIPS_mode() 0
++#endif
+ 
+ #ifdef FIPS_SUPPORT
+ /* In FIPS mode non-FIPS algorithms are disabled and return badarg. */
