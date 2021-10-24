@@ -18,7 +18,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	24.1.2
-Release:	1
+Release:	2
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -99,7 +99,9 @@ Dokumentacja do Erlanga.
 %endif
 	--disable-silent-rules \
 	--enable-smp-support \
-	--with-javac%{!?with_java:=no}
+	--with-javac%{!?with_java:=no} \
+	--with-ssl-lib-subdir=%{_lib}
+
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
  %{__make} -j1 \
