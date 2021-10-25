@@ -44,6 +44,7 @@ BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 BuildRequires:	openssl-tools
 BuildRequires:	perl-base
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
