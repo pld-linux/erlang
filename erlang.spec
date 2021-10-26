@@ -34,9 +34,10 @@ Patch1:		x32.patch
 # disable pdf docs (require libxslt-progs and fop > 1.0, with -cache option)
 Patch2:		%{name}-no-fop.patch
 Patch3:		ssl.patch
+Patch4:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
-BuildRequires:	autoconf
+BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
 BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
@@ -87,9 +88,10 @@ Dokumentacja do Erlanga.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
-./otp_build autoconf
+./otp_build update_configure --no-commit
 
 %configure \
 %ifarch sparc
@@ -200,9 +202,15 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-%{erts_version}
+%{_libdir}/%{name}/erts-%{erts_version}/info
 %{_libdir}/%{name}/erts-%{erts_version}/man
 %{_libdir}/%{name}/erts-%{erts_version}/src
 %{_libdir}/%{name}/erts-%{erts_version}/include
+%dir %{_libdir}/%{name}/erts-%{erts_version}/lib
+%{_libdir}/%{name}/erts-%{erts_version}/lib/liberts*.a
+%dir %{_libdir}/%{name}/erts-%{erts_version}/lib/internal
+%{_libdir}/%{name}/erts-%{erts_version}/lib/internal/liberts_internal*.a
+%{_libdir}/%{name}/erts-%{erts_version}/lib/internal/libethread.a
 #%{_libdir}/%{name}/erts-%{erts_version}/*.ear
 %dir %{_libdir}/%{name}/erts-%{erts_version}/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/beam*
