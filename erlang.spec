@@ -12,19 +12,19 @@
 %bcond_without	odbc		# without unixODBC support
 #
 
-%define		erts_version	12.1.2
+%define		erts_version	13.1.2
 
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	24.1.2
-Release:	2
+Version:	25.1.2
+Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	103fb735f9510574c1bbbd12690c5b63
+# Source0-md5:	ac654a239f8e9c3514b183c657bca4bf
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -33,7 +33,7 @@ Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
 # disable pdf docs (require libxslt-progs and fop > 1.0, with -cache option)
 Patch2:		%{name}-no-fop.patch
-Patch3:		ssl.patch
+
 Patch4:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
@@ -87,7 +87,7 @@ Dokumentacja do Erlanga.
 #%patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
+
 %patch4 -p1
 
 %build
@@ -207,7 +207,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/erts-%{erts_version}/src
 %{_libdir}/%{name}/erts-%{erts_version}/include
 %dir %{_libdir}/%{name}/erts-%{erts_version}/lib
-%{_libdir}/%{name}/erts-%{erts_version}/lib/liberts*.a
 %dir %{_libdir}/%{name}/erts-%{erts_version}/lib/internal
 %{_libdir}/%{name}/erts-%{erts_version}/lib/internal/liberts_internal*.a
 %{_libdir}/%{name}/erts-%{erts_version}/lib/internal/libethread.a

@@ -1,9 +1,10 @@
 --- otp-OTP-24.1.2/otp_build.orig	2021-10-04 17:12:13.000000000 +0200
 +++ otp-OTP-24.1.2/otp_build	2021-10-25 21:32:32.099541733 +0200
-@@ -197,20 +197,6 @@ do_update_configure ()
+@@ -197,21 +197,6 @@ do_update_configure ()
  {
      get_do_commit $1
-    
+ 
+-    export AUTOCONF_VERSION="$USE_AUTOCONF_VERSION"
 -    ac_ver_blob=`autoconf --version`
 -    if [ $? -ne 0 ]; then
 -	echo "ERROR: Failed to check autoconf version! You need to have autoconf of version $USE_AUTOCONF_VERSION in path." 1>&2
@@ -20,4 +21,5 @@
 -    
      out_files=
  
-     for dir in $aclocal_dirs; do
+     install_sh=`basename $install_sh_master`
+
