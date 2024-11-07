@@ -10,6 +10,7 @@
 # Conditional build:
 %bcond_with	java		# with Java support
 %bcond_without	odbc		# without unixODBC support
+%bcond_without	doc		# build documentation
 #
 
 %define		erts_version	13.1.2
@@ -112,7 +113,7 @@ ERL_TOP=`pwd`; export ERL_TOP
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
-%{__make} -j1 docs
+%{?with_doc:%{__make} -j1 docs}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -121,9 +122,11 @@ rm -rf $RPM_BUILD_ROOT
 	TARGET="%{_erl_target}" \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
+%if %{with doc}
 env ERL_LIBS="$RPM_BUILD_ROOT%{_libdir}/erlang/lib" \
 	%{__make} install-docs \
 		DESTDIR=$RPM_BUILD_ROOT
+%endif
 
 install -D -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.service
 install -D -p %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.socket
@@ -153,12 +156,14 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
 
+%if %{with doc}
 # Move noarch docs to _datadir
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/erts-%{erts_version}
 %{__mv} $RPM_BUILD_ROOT{%{_libdir},%{_datadir}}/%{name}/doc
 %{__ln} -s %{_datadir}/%{name}/doc $RPM_BUILD_ROOT%{_libdir}/%{name}/doc
 %{__mv} $RPM_BUILD_ROOT{%{_libdir},%{_datadir}}/%{name}/erts-%{erts_version}/doc
 %{__ln} -s %{_datadir}/%{name}/erts-%{erts_version}/doc $RPM_BUILD_ROOT%{_libdir}/%{name}/erts-%{erts_version}/doc
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -203,7 +208,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-%{erts_version}
-%{_libdir}/%{name}/erts-%{erts_version}/info
+%{?with_doc:%{_libdir}/%{name}/erts-%{erts_version}/info}
 %{_libdir}/%{name}/erts-%{erts_version}/man
 %{_libdir}/%{name}/erts-%{erts_version}/src
 %{_libdir}/%{name}/erts-%{erts_version}/include
@@ -231,10 +236,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/misc/*
 %{_libdir}/%{name}/releases
 %{_libdir}/%{name}/usr
-%doc %{_libdir}/%{name}/man
+%{?with_doc:%doc %{_libdir}/%{name}/man}
 %attr(755,root,root) %{_libdir}/%{name}/Install
 
-%{_libdir}/%{name}/doc
+%{?with_doc:%{_libdir}/%{name}/doc}
 %{_libdir}/%{name}/erts-%{erts_version}/doc
 
 %{systemdunitdir}/epmd.service
@@ -242,9 +247,11 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/epmd@.service
 %{systemdunitdir}/epmd@.socket
 
+%if %{with doc}
 %files doc
 %defattr(644,root,root,755)
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}/erts-%{erts_version}
 %{_datadir}/%{name}/doc
 %{_datadir}/%{name}/erts-%{erts_version}/doc
+%endif
