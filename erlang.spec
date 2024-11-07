@@ -41,6 +41,7 @@ BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
 BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
+BuildRequires:	libstdc++-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
 BuildRequires:	openssl-tools
