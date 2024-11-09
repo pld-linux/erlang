@@ -13,33 +13,32 @@
 %bcond_without	doc		# build documentation
 #
 
-%define		erts_version	13.1.2
+%define		erts_version	15.1.2
 
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	25.1.2
+Version:	27.1.2
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	ac654a239f8e9c3514b183c657bca4bf
+# Source0-md5:	e513e7f4633433081eab820e8414c4e1
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
-# disable pdf docs (require libxslt-progs and fop > 1.0, with -cache option)
-Patch2:		%{name}-no-fop.patch
 
 Patch4:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
+%{?with_doc:BuildRequires:	ex_doc}
 BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
 BuildRequires:	libstdc++-devel
@@ -88,7 +87,6 @@ Dokumentacja do Erlanga.
 %setup -q -n otp-OTP-%{_version}
 #%patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 %patch4 -p1
 
@@ -113,7 +111,7 @@ ERL_TOP=`pwd`; export ERL_TOP
 	TARGET="%{_erl_target}" \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
-%{?with_doc:%{__make} -j1 docs}
+%{?with_doc:LC_ALL=C.UTF-8 %{__make} -j1 docs}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -139,7 +137,6 @@ install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 %{__sed} -i -e '1s,/usr/bin/env escript,/usr/bin/escript,' \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/diameter-*/bin/diameterc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/edoc-*/bin/edoc \
-	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/erl_docgen-*/priv/bin/{codeline_preprocessing,xml_from_edoc}.escript \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/reltool-*/examples/{display_args,mnesia_core_dump_viewer} \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/bin/snmpc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/src/compiler/snmpc.src
@@ -208,7 +205,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/bin/typer
 %{_libdir}/%{name}/bin/start*.*
 %dir %{_libdir}/%{name}/erts-%{erts_version}
-%{?with_doc:%{_libdir}/%{name}/erts-%{erts_version}/info}
 %{_libdir}/%{name}/erts-%{erts_version}/man
 %{_libdir}/%{name}/erts-%{erts_version}/src
 %{_libdir}/%{name}/erts-%{erts_version}/include
