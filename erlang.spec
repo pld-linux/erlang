@@ -13,6 +13,7 @@
 %bcond_without	doc		# build documentation
 #
 
+%define		otp		%(echo %version | cut -f1 -d.)
 %define		erts_version	15.1.2
 
 Summary:	OpenSource Erlang/OTP
@@ -56,6 +57,9 @@ BuildConflicts:	unixODBC-devel
 %endif
 Requires:	systemd-units >= 38
 Requires(post,preun,postun):	systemd-units >= 38
+Provides:	erlang(OTP) = %otp
+Provides:	erlang(OTP) = %{lua:print(macros.otp - 1)}
+Provides:	erlang(OTP) = %{lua:print(macros.otp - 2)}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define _erl_target %(echo %{_build}%{?_gnu} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/;s/x32/x86_64/')
