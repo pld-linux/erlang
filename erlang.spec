@@ -48,7 +48,7 @@ BuildRequires:	openssl-devel >= 0.9.7
 BuildRequires:	openssl-tools
 BuildRequires:	perl-base
 BuildRequires:	rpm-build >= 4.6
-BuildRequires:	rpmbuild(macros) >= 1.752
+BuildRequires:	rpmbuild(macros) >= 2.007
 BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
@@ -98,6 +98,11 @@ Dokumentacja do Erlanga.
 ./otp_build update_configure --no-commit
 
 %configure \
+%ifarch %{ix86}
+%ifnarch %{x86_with_sse2}
+	ac_cv_sizeof__Float16=0 \
+%endif
+%endif
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
 %endif
