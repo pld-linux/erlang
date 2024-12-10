@@ -42,6 +42,7 @@ BuildRequires:	automake
 %{?with_doc:BuildRequires:	ex_doc}
 BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
+BuildRequires:	libsctp-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
@@ -49,6 +50,7 @@ BuildRequires:	openssl-tools
 BuildRequires:	perl-base
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 2.007
+BuildRequires:	systemd-devel
 BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
