@@ -33,7 +33,7 @@ Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
-Patch2:		proc-fd.patch
+Patch2:		no-file-fd.patch
 Patch3:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
