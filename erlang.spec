@@ -33,8 +33,8 @@ Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
-
-Patch4:		%{name}-ac.patch
+Patch2:		proc-fd.patch
+Patch3:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf >= 2.69
@@ -91,8 +91,8 @@ Dokumentacja do Erlanga.
 %setup -q -n otp-OTP-%{_version}
 #%patch0 -p1
 %patch1 -p1
-
-%patch4 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 ./otp_build update_configure --no-commit
