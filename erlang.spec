@@ -194,13 +194,11 @@ rm -rf $RPM_BUILD_ROOT
 %post
 %if %{with systemd}
 %systemd_post epmd.service
-%systemd_post epmd@.service
 %endif
 
 %preun
 %if %{with systemd}
 %systemd_preun epmd.service
-%systemd_preun epmd@.service
 %endif
 
 %postun
