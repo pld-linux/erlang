@@ -21,7 +21,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	27.1.2
-Release:	2
+Release:	3
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
@@ -58,10 +58,18 @@ BuildRequires:	unixODBC-devel
 %else
 BuildConflicts:	unixODBC-devel
 %endif
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 %{?with_systemd:Requires:	systemd-units >= 38}
 Provides:	erlang(OTP) = %otp
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 1)}
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 2)}
+Provides:	group(epmd)
+Provides:	user(epmd)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define _erl_target %(echo %{_build}%{?_gnu} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/;s/x32/x86_64/')
@@ -179,6 +187,10 @@ install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/erts-%{erts_version}
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre
+%groupadd -g 352 epmd
+%useradd -u 352 -r -d /usr/share/empty -s /bin/false -c "Erlang Port Mapper Daemon User" -g epmd epmd
+
 %post
 %if %{with systemd}
 %systemd_post epmd.service
@@ -192,6 +204,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %postun
+if [ "$1" = "0" ]; then
+	%userremove epmd
+	%groupremove epmd
+fi
 %if %{with systemd}
 %systemd_reload
 %endif
