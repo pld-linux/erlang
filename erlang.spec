@@ -11,6 +11,7 @@
 %bcond_with	java		# with Java support
 %bcond_without	odbc		# without unixODBC support
 %bcond_without	doc		# build documentation
+%bcond_without	systemd		# systemd support
 #
 
 %define		otp		%(echo %version | cut -f1 -d.)
@@ -50,15 +51,14 @@ BuildRequires:	openssl-tools
 BuildRequires:	perl-base
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 2.007
-BuildRequires:	systemd-devel
+%{?with_systemd:BuildRequires:	systemd-devel}
 BuildRequires:	xorg-lib-libX11-devel
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
 %else
 BuildConflicts:	unixODBC-devel
 %endif
-Requires:	systemd-units >= 38
-Requires(post,preun,postun):	systemd-units >= 38
+%{?with_systemd:Requires:	systemd-units >= 38}
 Provides:	erlang(OTP) = %otp
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 1)}
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 2)}
@@ -113,6 +113,7 @@ Dokumentacja do Erlanga.
 %endif
 	--disable-silent-rules \
 	--enable-smp-support \
+	%{__enable_disable systemd} \
 	--with-javac%{!?with_java:=no} \
 	--with-ssl-lib-subdir=%{_lib}
 
@@ -137,10 +138,12 @@ env ERL_LIBS="$RPM_BUILD_ROOT%{_libdir}/erlang/lib" \
 		DESTDIR=$RPM_BUILD_ROOT
 %endif
 
+%if %{with systemd}
 install -D -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.service
 install -D -p %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/epmd.socket
 install -D -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.service
 install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
+%endif
 
 %{__sed} -i -e"s#$RPM_BUILD_ROOT##" \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/bin/{erl,start,start_erl}
@@ -177,15 +180,21 @@ install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/erts-%{erts_version}
 rm -rf $RPM_BUILD_ROOT
 
 %post
+%if %{with systemd}
 %systemd_post epmd.service
 %systemd_post epmd@.service
+%endif
 
 %preun
+%if %{with systemd}
 %systemd_preun epmd.service
 %systemd_preun epmd@.service
+%endif
 
 %postun
+%if %{with systemd}
 %systemd_reload
+%endif
 
 %files -f lib.list
 %defattr(644,root,root,755)
@@ -249,10 +258,12 @@ rm -rf $RPM_BUILD_ROOT
 %{?with_doc:%{_libdir}/%{name}/doc}
 %{_libdir}/%{name}/erts-%{erts_version}/doc
 
+%if %{with systemd}
 %{systemdunitdir}/epmd.service
 %{systemdunitdir}/epmd.socket
 %{systemdunitdir}/epmd@.service
 %{systemdunitdir}/epmd@.socket
+%endif
 
 %if %{with doc}
 %files doc
