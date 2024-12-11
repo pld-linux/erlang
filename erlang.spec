@@ -65,6 +65,8 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 %{?with_systemd:Requires:	systemd-units >= 38}
+# dynamically loaded libsctp.so.1
+Suggests:	libsctp
 Provides:	erlang(OTP) = %otp
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 1)}
 Provides:	erlang(OTP) = %{lua:print(macros.otp - 2)}
