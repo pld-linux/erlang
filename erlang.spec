@@ -15,19 +15,19 @@
 #
 
 %define		otp		%(echo %version | cut -f1 -d.)
-%define		erts_version	15.1.2
+%define		erts_version	15.2.7
 
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	27.1.2
-Release:	3
+Version:	27.3.4.1
+Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	e513e7f4633433081eab820e8414c4e1
+# Source0-md5:	0a299cd8e440b10a71a837978fb6bdbc
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
@@ -101,10 +101,10 @@ Dokumentacja do Erlanga.
 
 %prep
 %setup -q -n otp-OTP-%{_version}
-#%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
+#%%patch -P0 -p1
+%patch -P1 -p1
+%patch -P2 -p1
+%patch -P3 -p1
 
 %build
 ./otp_build update_configure --no-commit
