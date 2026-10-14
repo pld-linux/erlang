@@ -12,47 +12,52 @@
 %bcond_without	odbc		# without unixODBC support
 %bcond_without	doc		# build documentation
 %bcond_without	systemd		# systemd support
+%bcond_without	wx		# wxWidgets GUI (observer, debugger, et)
 #
 
 %define		otp		%(echo %version | cut -f1 -d.)
-%define		erts_version	15.2.7
+%define		erts_version	17.1.1
 
 Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
-Version:	27.3.4.1
+Version:	29.1.2
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	APLv2
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
-# Source0-md5:	0a299cd8e440b10a71a837978fb6bdbc
+# Source0-md5:	5ee3e77d6badc04dbd8e96dcf53ede5f
 Source2:	epmd.service
 Source3:	epmd.socket
 Source4:	epmd@.service
 Source5:	epmd@.socket
 Patch0:		%{name}-fPIC.patch
 Patch1:		x32.patch
-Patch2:		no-file-fd.patch
 Patch3:		%{name}-ac.patch
 URL:		http://www.erlang.org/
 %{?with_java:BuildRequires:	/usr/bin/jar}
 BuildRequires:	autoconf >= 2.69
-BuildRequires:	automake
-%{?with_doc:BuildRequires:	ex_doc}
+%{?with_doc:BuildRequires:	ex_doc >= 0.40.4}
 BuildRequires:	flex
 %{?with_java:BuildRequires:	jdk >= 1.2}
+%{?with_wx:BuildRequires:	OpenGL-GLU-devel}
+%{?with_wx:BuildRequires:	OpenGL-devel}
 BuildRequires:	libsctp-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel >= 0.9.7
-BuildRequires:	openssl-tools
 BuildRequires:	perl-base
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 2.007
 %{?with_systemd:BuildRequires:	systemd-devel}
-BuildRequires:	xorg-lib-libX11-devel
+%if %{with wx}
+BuildRequires:	wxGTK3-unicode-devel >= 1:3.0.2
+BuildRequires:	wxGTK3-unicode-gl-devel >= 1:3.0.2
+%endif
+BuildRequires:	zlib-devel
+BuildRequires:	zstd-static >= 1.5.6
 %if %{with odbc}
 BuildRequires:	unixODBC-devel
 %else
@@ -103,12 +108,13 @@ Dokumentacja do Erlanga.
 %setup -q -n otp-OTP-%{_version}
 #%%patch -P0 -p1
 %patch -P1 -p1
-%patch -P2 -p1
 %patch -P3 -p1
 
 %build
 ./otp_build update_configure --no-commit
 
+# --without-wx breaks the build of debugger, observer and et (they need the wx
+# beams), so without wx only wx-config is hidden and the wx driver is skipped
 %configure \
 %ifarch %{ix86}
 %ifnarch %{x86_with_sse2}
@@ -118,19 +124,27 @@ Dokumentacja do Erlanga.
 %ifarch sparc
 	CFLAGS="%{rpmcflags} -mv8plus" \
 %endif
-%ifarch x32
-	--disable-hipe \
+%if %{with wx}
+	WX_CONFIG_NAME=%{_bindir}/wx-gtk3-unicode-config \
+%else
+	ac_cv_path_WX_CONFIG_PATH=no \
 %endif
+	--disable-builtin-zlib \
+	--disable-builtin-zstd \
 	--disable-silent-rules \
-	--enable-smp-support \
 	%{__enable_disable systemd} \
 	--with-javac%{!?with_java:=no} \
-	--with-ssl-lib-subdir=%{_lib}
+	--with-ssl-lib-subdir=%{_lib} \
+	%{?with_odbc:--with-odbc} \
+	%{?with_wx:--with-wx}
 
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
+# lib/odbc builds odbcserver only when ODBC_CAN_BUILD_DRIVER is set in make's
+# environment, configure does not export it: https://github.com/erlang/otp/issues/11705
  %{__make} -j1 \
 	TARGET="%{_erl_target}" \
+	%{?with_odbc:ODBC_CAN_BUILD_DRIVER=true} \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
 %{?with_doc:LC_ALL=C.UTF-8 %{__make} -j1 docs}
@@ -140,6 +154,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %{__make} -j1 install \
 	TARGET="%{_erl_target}" \
+	%{?with_odbc:ODBC_CAN_BUILD_DRIVER=true} \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
 %if %{with doc}
@@ -161,7 +176,6 @@ install -D -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/epmd@.socket
 %{__sed} -i -e '1s,/usr/bin/env escript,/usr/bin/escript,' \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/diameter-*/bin/diameterc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/edoc-*/bin/edoc \
-	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/reltool-*/examples/{display_args,mnesia_core_dump_viewer} \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/bin/snmpc \
 	$RPM_BUILD_ROOT%{_libdir}/%{name}/lib/snmp-*/src/compiler/snmpc.src
 
@@ -248,12 +262,12 @@ fi
 %dir %{_libdir}/%{name}/erts-%{erts_version}/lib/internal
 %{_libdir}/%{name}/erts-%{erts_version}/lib/internal/liberts_internal*.a
 %{_libdir}/%{name}/erts-%{erts_version}/lib/internal/libethread.a
+%{_libdir}/%{name}/erts-%{erts_version}/lib/internal/README
 #%{_libdir}/%{name}/erts-%{erts_version}/*.ear
 %dir %{_libdir}/%{name}/erts-%{erts_version}/bin
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/beam*
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/ct_run
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/dialyzer
-%attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/dyn_erl
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/e*
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/heart*
 %attr(755,root,root) %{_libdir}/%{name}/erts-%{erts_version}/bin/inet_gethost
