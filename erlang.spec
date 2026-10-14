@@ -22,7 +22,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	29.1.2
-Release:	1
+Release:	2
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	Apache v2.0
@@ -90,6 +90,76 @@ encourage the spread of Erlang outside Ericsson.
 Erlang to język programowania opracowany w Ericsson Computer Science
 Laboratory. Open-source Erlang został wydany, aby pomóc w
 rozpowszechnianiu Erlanga poza Ericssonem.
+
+%package debugger
+Summary:	Erlang debugger
+Summary(pl.UTF-8):	Debugger dla Erlanga
+Group:		Development/Languages
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-wx = %{epoch}:%{version}-%{release}
+
+%description debugger
+Graphical debugger for Erlang programs.
+
+%description debugger -l pl.UTF-8
+Graficzny debugger dla programów w Erlangu.
+
+%package et
+Summary:	Erlang Event Tracer
+Summary(pl.UTF-8):	Event Tracer dla Erlanga
+Group:		Development/Languages
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-wx = %{epoch}:%{version}-%{release}
+
+%description et
+Event Tracer (ET) for recording and graphical presentation of Erlang
+events.
+
+%description et -l pl.UTF-8
+Event Tracer (ET) do rejestrowania i graficznej prezentacji zdarzeń
+w Erlangu.
+
+%package observer
+Summary:	Erlang system observer
+Summary(pl.UTF-8):	Narzędzie do obserwacji systemów w Erlangu
+Group:		Development/Languages
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-et = %{epoch}:%{version}-%{release}
+Requires:	%{name}-wx = %{epoch}:%{version}-%{release}
+
+%description observer
+Graphical tool for observing characteristics of Erlang systems, with
+crashdump viewer, etop and trace tool builder (ttb).
+
+%description observer -l pl.UTF-8
+Graficzne narzędzie do obserwacji systemów w Erlangu, wraz z
+przeglądarką zrzutów awaryjnych, etop i ttb.
+
+%package reltool
+Summary:	Erlang release management tool
+Summary(pl.UTF-8):	Narzędzie do zarządzania wydaniami w Erlangu
+Group:		Development/Languages
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-wx = %{epoch}:%{version}-%{release}
+
+%description reltool
+Release management tool for Erlang/OTP with graphical frontend.
+
+%description reltool -l pl.UTF-8
+Narzędzie do zarządzania wydaniami Erlang/OTP z interfejsem
+graficznym.
+
+%package wx
+Summary:	wxWidgets binding for Erlang
+Summary(pl.UTF-8):	Wiązanie wxWidgets dla Erlanga
+Group:		Development/Languages
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+
+%description wx
+wxWidgets GUI library binding for Erlang.
+
+%description wx -l pl.UTF-8
+Wiązanie biblioteki graficznej wxWidgets dla Erlanga.
 
 %package doc
 Summary:	Erlang documentation
@@ -193,6 +263,11 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%attr(755,root,root) %%{_libdir}/%%{name}/#" >> lib.list
 find $RPM_BUILD_ROOT%{_libdir}/%{name}/lib -type f '!' -perm -500 \
 	| %{__sed} -e"s#^$RPM_BUILD_ROOT%{_libdir}/%{name}/#%%{_libdir}/%%{name}/#" >> lib.list
+for app in debugger et observer reltool wx; do
+	%{__grep} "/lib/$app-[0-9]" lib.list > $app.list
+	%{__grep} -v "/lib/$app-[0-9]" lib.list > lib.list.tmp
+	%{__mv} lib.list.tmp lib.list
+done
 
 %if %{with doc}
 # Move noarch docs to _datadir
@@ -301,6 +376,21 @@ fi
 %{systemdunitdir}/epmd@.service
 %{systemdunitdir}/epmd@.socket
 %endif
+
+%files debugger -f debugger.list
+%defattr(644,root,root,755)
+
+%files et -f et.list
+%defattr(644,root,root,755)
+
+%files observer -f observer.list
+%defattr(644,root,root,755)
+
+%files reltool -f reltool.list
+%defattr(644,root,root,755)
+
+%files wx -f wx.list
+%defattr(644,root,root,755)
 
 %if %{with doc}
 %files doc
