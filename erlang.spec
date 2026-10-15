@@ -22,7 +22,7 @@ Summary:	OpenSource Erlang/OTP
 Summary(pl.UTF-8):	Erlang/OTP z otwartymi źródłami
 Name:		erlang
 Version:	29.1.2
-Release:	2
+Release:	3
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
 License:	Apache v2.0
@@ -78,8 +78,6 @@ Provides:	erlang(OTP) = %{lua:print(macros.otp - 2)}
 Provides:	group(epmd)
 Provides:	user(epmd)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define _erl_target %(echo %{_build}%{?_gnu} | sed -e's/amd64/x86_64/;s/athlon/i686/;s/ppc/powerpc/;s/x32/x86_64/')
 
 %description
 Erlang is a programming language designed at the Ericsson Computer
@@ -210,10 +208,12 @@ Dokumentacja do Erlanga.
 
 rm -f lib/ssl/SKIP
 ERL_TOP=`pwd`; export ERL_TOP
+# TARGET must name the --host configure was given; make/target.mk canonicalizes it
+# with config.sub the same way configure does
 # lib/odbc builds odbcserver only when ODBC_CAN_BUILD_DRIVER is set in make's
 # environment, configure does not export it: https://github.com/erlang/otp/issues/11705
  %{__make} -j1 \
-	TARGET="%{_erl_target}" \
+	TARGET="%{_host}" \
 	%{?with_odbc:ODBC_CAN_BUILD_DRIVER=true} \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
@@ -226,7 +226,7 @@ LC_ALL=C.UTF-8 \
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} -j1 install \
-	TARGET="%{_erl_target}" \
+	TARGET="%{_host}" \
 	%{?with_odbc:ODBC_CAN_BUILD_DRIVER=true} \
 	INSTALL_PREFIX=$RPM_BUILD_ROOT
 
@@ -306,7 +306,7 @@ fi
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS README.md SECURITY
+%doc AUTHORS README.md SECURITY.md
 %attr(755,root,root) %{_bindir}/ct_run
 %attr(755,root,root) %{_bindir}/dialyzer
 %attr(755,root,root) %{_bindir}/epmd
