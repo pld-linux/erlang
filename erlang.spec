@@ -8,9 +8,9 @@
 # - investigate fPIC.patch
 #
 # Conditional build:
-%bcond_with	java		# with Java support
-%bcond_without	odbc		# without unixODBC support
-%bcond_without	doc		# build documentation
+%bcond_with	java		# Java support
+%bcond_without	odbc		# unixODBC support
+%bcond_without	doc		# documentation
 %bcond_without	systemd		# systemd support
 %bcond_without	wx		# wxWidgets GUI (observer, debugger, et)
 #
@@ -25,7 +25,7 @@ Version:	29.1.2
 Release:	1
 Epoch:		2
 %define		_version	%(echo %{version} | tr _ -)
-License:	APLv2
+License:	Apache v2.0
 Group:		Development/Languages
 Source0:	https://github.com/erlang/otp/archive/OTP-%{version}.tar.gz
 # Source0-md5:	5ee3e77d6badc04dbd8e96dcf53ede5f
@@ -147,7 +147,10 @@ ERL_TOP=`pwd`; export ERL_TOP
 	%{?with_odbc:ODBC_CAN_BUILD_DRIVER=true} \
 	|| { find . -name erl_crash.dump | xargs cat ; exit 1 ; }
 
-%{?with_doc:LC_ALL=C.UTF-8 %{__make} -j1 docs}
+%if %{with doc}
+LC_ALL=C.UTF-8 \
+%{__make} -j1 docs
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -228,7 +231,7 @@ fi
 
 %files -f lib.list
 %defattr(644,root,root,755)
-%doc AUTHORS
+%doc AUTHORS README.md SECURITY
 %attr(755,root,root) %{_bindir}/ct_run
 %attr(755,root,root) %{_bindir}/dialyzer
 %attr(755,root,root) %{_bindir}/epmd
@@ -282,10 +285,14 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/misc/*
 %{_libdir}/%{name}/releases
 %{_libdir}/%{name}/usr
-%{?with_doc:%doc %{_libdir}/%{name}/man}
+%if %{with doc}
+%doc %{_libdir}/%{name}/man
+%endif
 %attr(755,root,root) %{_libdir}/%{name}/Install
 
-%{?with_doc:%{_libdir}/%{name}/doc}
+%if %{with doc}
+%{_libdir}/%{name}/doc
+%endif
 %{_libdir}/%{name}/erts-%{erts_version}/doc
 
 %if %{with systemd}
